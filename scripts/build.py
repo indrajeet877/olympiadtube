@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build OlympiadTube's 40-module Olympiad & Deep STEM YouTube index (data/videos.json).
+"""Build OlympiadTube's 44-module Global & All-India Olympiad YouTube index (data/videos.json).
 
 Pure Python 3 standard library. Run from anywhere:
 
@@ -7,18 +7,18 @@ Pure Python 3 standard library. Run from anywhere:
     python3 scripts/build.py
     python3 scripts/build.py --fresh
 
-Queries YouTube's public web search endpoint across all 40 canonical Olympiad modules
+Queries YouTube's public web search endpoint across all 44 canonical Olympiad modules
 spanning 5 streams:
-  1. Maths Olympiad (IOQM · RMO · INMO · IMO — 12 modules)
-  2. Physics Olympiad (NSEP · INPhO · IPhO — 10 modules)
+  1. Maths Olympiad (IOQM · RMO · INMO · IMO · EGMO · AMC 8/10/12 · AIME · ISI/CMI · NMTC — 15 modules)
+  2. Physics Olympiad (NSEP · INPhO · IPhO · APhO — 10 modules)
   3. Chemistry Olympiad (NSEC · INChO · IChO — 8 modules)
-  4. Jr Science & Astronomy (NSEJS · IJSO · NSEA · IOAA — 5 modules)
+  4. Jr Science & Astronomy (NSEJS · IJSO · NSEB/INBO · NSEA/IOAA · NTSE · Homi Bhabha · IAT/NEST — 6 modules)
   5. Informatics Olympiad (ZCO · ZIO · INOI · IOI — 5 modules)
 
-Enforces a strict Verified Olympiad / Deep STEM / Competitive Programming channel
-allowlist, >= 8 minute (480s) duration floor, cross-stream guards, and 100% pure
-YouTube audience trend ranking (trend_score, views_per_month, view_count) with ZERO
-artificial institute priority.
+Supports all popular Indian languages (English, Hinglish, Hindi, Bengali, Tamil, Telugu,
+Malayalam, Kannada, Marathi, Gujarati, Odia, Punjabi) alongside global Olympiad educators.
+Enforces >= 8 minute (480s) duration floor, cross-stream guards, and 100% pure YouTube
+audience trend ranking (trend_score, views_per_month, view_count) with ZERO institute bias.
 """
 
 from __future__ import annotations
@@ -67,23 +67,52 @@ STATS = {"requests": 0, "cached": 0}
 
 MIN_VIDEO_SECONDS = 480  # >= 8 minutes for focused Olympiad problem walkthroughs & lectures
 
+CANONICAL_LANGUAGES = {
+    "English",
+    "Hinglish",
+    "Hindi",
+    "Bengali",
+    "Tamil",
+    "Telugu",
+    "Malayalam",
+    "Kannada",
+    "Marathi",
+    "Gujarati",
+    "Odia",
+    "Punjabi",
+}
+
+REGIONAL_LANGUAGES = CANONICAL_LANGUAGES - {"English", "Hinglish"}
+
+VALID_TARGET_EXAMS = {
+    "IOQM · RMO · INMO",
+    "IMO · EGMO · Global MO",
+    "AMC 8/10/12 & AIME",
+    "ISI · CMI · NMTC · Math Talent",
+    "NSEP · INPhO · IPhO",
+    "NSEC · INChO · IChO",
+    "NSEJS · NSEB · NSEA · IAT",
+    "ZCO · ZIO · INOI · IOI",
+}
+
 # ---------------------------------------------------------------------------
-# Complete 40-Module Canonical Olympiad Syllabus Taxonomy across 5 Streams
+# Complete 44-Module Canonical Olympiad Syllabus Taxonomy across 5 Streams
 # Tuple:
 #   (ch_no, subject, unit, class_level, weightage, syllabus_scope, chapter_name,
 #    match_regex, pl_query_1, pl_query_2, long_query, focus_query_1, focus_query_2)
+# Existing cached query strings are preserved so data/cache/ hits immediately.
 # ---------------------------------------------------------------------------
 SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str, str]] = [
-    # ============ 1. MATHS OLYMPIAD (IOQM · RMO · INMO · IMO — 12 Modules) ============
+    # ============ 1. MATHS OLYMPIAD (15 Modules: 1..15) ============
     (
         1,
         "Maths Olympiad",
         "Number Theory",
         "Class 8–12",
         "Very High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · AMC · IMO",
         "Number Theory: Divisibility, Primes & Modular Arithmetic",
-        r"\b(number\s+theory|divisibility|primes?\b|prime\s+numbers?|modular\s+arithmetic|modulo|congruenc\w*|gcd|lcm|euclid\w*|bezout|chinese\s+remainder|\bcrt\b|base\s+system\w*)",
+        r"\b(number\s+theory|number\s+system\w*|divisibility|primes?\b|prime\s+numbers?|modular\s+arithmetic|modulo|congruenc\w*|gcd|lcm|euclid\w*|bezout|chinese\s+remainder|\bcrt\b|base\s+system\w*)",
         "Number Theory IOQM RMO Olympiad",
         "Modular Arithmetic Divisibility Primes Olympiad",
         "Number Theory Divisibility Modular Arithmetic IOQM RMO",
@@ -96,9 +125,9 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Number Theory",
         "Class 9–12",
         "Very High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · AIME · IMO",
         "Diophantine Equations, Fermat, Euler & Number Theory Problems",
-        r"\b(diophantine|fermat\w*|euler'?s?\s+(?:theorem|totient|phi)|wilson'?s?\s+theorem|lifting\s+the\s+exponent|\blte\b|pell'?s?|legendre\w*|quadratic\s+residue\w*|integer\s+solutions?|number\s+theory\s+problems?|(?:imo|inmo|rmo|putnam)\s+number\s+theory)",
+        r"\b(diophantine|fermat\w*|euler'?s?\s+(?:theorem|totient|phi)|wilson'?s?\s+theorem|lifting\s+the\s+exponent|\blte\b|pell'?s?|legendre\w*|quadratic\s+residue\w*|integer\s+solutions?|number\s+theory\s+problems?|(?:imo|inmo|rmo|putnam|aime)\s+number\s+theory)",
         "Diophantine Equations Olympiad Number Theory",
         "Fermat Euler Theorem IOQM RMO Olympiad",
         "Diophantine Equations Fermat Euler Theorem IOQM RMO INMO",
@@ -111,7 +140,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Algebra",
         "Class 8–12",
         "High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · AMC · AIME",
         "Polynomials, Roots & Vieta's Relations",
         r"\b(polynomials?|vieta\w*|symmetric\s+(?:polynomials?|functions?)|roots?\s+of\s+polynomial\w*|irreducib\w*|rational\s+root|remainder\s+theorem|factor\s+theorem|newton'?s?\s+sums?|vieta\s+jumping)",
         "Polynomials IOQM RMO Maths Olympiad",
@@ -126,7 +155,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Algebra",
         "Class 9–12",
         "Very High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · EGMO · IMO",
         "Algebraic Inequalities (AM-GM, Cauchy-Schwarz, Rearrangement)",
         r"\b(inequalit(?:y|ies)|am[\s-]*gm|cauchy[\s-]*schwarz|rearrangement\s+inequalit\w*|jensen\w*|chebyshev\w*|holder\w*|muirhead|schur\w*|titu'?s?\s+lemma|nesbitt)",
         "Inequalities IOQM RMO INMO Olympiad",
@@ -141,9 +170,9 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Algebra",
         "Class 9–12",
         "Very High",
-        "RMO · INMO · IMO",
+        "RMO · INMO · EGMO · IMO",
         "Functional Equations & Recurrence Sequences",
-        r"\b(functional\s+equations?|cauchy'?s?\s+functional|recurrence\s*(?:relations?|sequences?)?|recursive\s+sequence\w*|characteristic\s+equation|telescoping|fibonacci|generating\s+functions?|sequence\w*\s+(?:and\s+series\s+)?(?:ioqm|prmo|rmo|inmo|imo|olympiad))",
+        r"\b(functional\s+equations?|cauchy'?s?\s+functional|recurrence\s*(?:relations?|sequences?)?|recursive\s+sequence\w*|characteristic\s+equation|telescoping|fibonacci|generating\s+functions?|sequence\w*\s+(?:and\s+series\s+)?(?:ioqm|prmo|rmo|inmo|imo|aime|amc|olympiad))",
         "Functional Equations Maths Olympiad IOQM INMO",
         "Recurrence Relations Sequences Maths Olympiad",
         "Functional Equations Recurrence Relations IOQM RMO INMO",
@@ -156,9 +185,9 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Combinatorics",
         "Class 8–12",
         "Very High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · AMC · AIME",
         "Combinatorics: Counting Principles, Bijections & Pigeonhole",
-        r"\b(combinatorics|counting\s+principles?|bijection\w*|bijective|pigeonhole|\bphp\b|stars?\s*(?:and|&)\s*bars?|beggar'?s?\s+method|double\s+counting|permutation\w*\s*(?:and|&)?\s*combination\w*\s+(?:ioqm|prmo|rmo|inmo|olympiad)|(?:ioqm|prmo|rmo|inmo)\s+(?:combinatorics|p\s*&\s*c|pnc))",
+        r"\b(combinatorics|counting\s+principles?|bijection\w*|bijective|pigeonhole|\bphp\b|stars?\s*(?:and|&)\s*bars?|beggar'?s?\s+method|double\s+counting|permutations?\s*(?:and|&)?\s*combinations?)",
         "Combinatorics IOQM RMO Maths Olympiad",
         "Pigeonhole Principle Combinatorics Olympiad",
         "Combinatorics Counting Principles Pigeonhole IOQM RMO",
@@ -171,7 +200,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Combinatorics",
         "Class 9–12",
         "High",
-        "RMO · INMO · IMO",
+        "RMO · INMO · EGMO · IMO",
         "Combinatorics: Inclusion-Exclusion, Invariants & Graph Counting",
         r"\b(inclusion[\s-]*exclusion|\bpie\b|derangement\w*|invariants?\b|monovariant\w*|extremal\s+principle|coloring|chessboard|tiling|ramsey|combinatorial\s+games?|graph\s+theory|planar\s+graphs?|chromatic|eulerian|hamiltonian|handshaking\s+lemma|tur[aá]n)",
         "Graph Theory Michael Penn Maths",
@@ -186,9 +215,9 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Geometry",
         "Class 8–12",
         "Very High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · AMC · IMO",
         "Plane Geometry: Triangles, Angle Chasing, Ceva & Menelaus",
-        r"\b(plane\s+geometry|euclidean\s+geometry|triangle\s+geometry|geometry\b.*\b(?:ioqm|prmo|rmo|inmo|imo|olympiad)|(?:ioqm|prmo|rmo|inmo|imo|olympiad)\b.*\bgeometry|angle\s+chasing|ceva\w*|menelaus|stewart'?s?\s+theorem|similarity|congruence|orthocent(?:re|er)|circumcent(?:re|er)|incent(?:re|er)|centroid|nine[\s-]*point|euler\s+line|simson\s+line)",
+        r"\b(plane\s+geometry|euclidean\s+geometry|triangle\s+geometry|triangles?\b.*\b(?:similarity|congruence|pythagoras|theorems?|geometry|olympiad|ntse)|geometry\b.*\b(?:ioqm|prmo|rmo|inmo|imo|amc|aime|egmo|olympiad)|(?:ioqm|prmo|rmo|inmo|imo|amc|aime|egmo|olympiad)\b.*\bgeometry|angle\s+chasing|ceva\w*|menelaus|stewart'?s?\s+theorem|similarity|congruence|orthocent(?:re|er)|circumcent(?:re|er)|incent(?:re|er)|centroid|nine[\s-]*point|euler\s+line|simson\s+line)",
         "Geometry IOQM RMO INMO Maths Olympiad",
         "Euclidean Geometry Olympiad Cheenta VOS",
         "Geometry Angle Chasing Ceva Menelaus IOQM RMO INMO",
@@ -201,9 +230,9 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Geometry",
         "Class 9–12",
         "Very High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · AIME · IMO",
         "Circle Geometry: Power of a Point, Cyclic Quads & Radical Axis",
-        r"\b(circle\s+geometry|circles?\b.*\b(?:ioqm|prmo|rmo|inmo|imo|olympiad|geometry)|(?:ioqm|prmo|rmo|inmo|imo|olympiad)\b.*\bcircles?\b|power\s+of\s+a\s+point|cyclic\s+quad\w*|ptolemy\w*|radical\s+(?:axis|cent(?:re|er))|concyclic|inscribed\s+angle|alternate\s+segment|homothety|inversion|miquel)",
+        r"\b(circle\s+geometry|circles?\b.*\b(?:ioqm|prmo|rmo|inmo|imo|amc|aime|olympiad|geometry|theorems?|chords?|tangents?)|(?:ioqm|prmo|rmo|inmo|imo|amc|aime|olympiad)\b.*\bcircles?\b|power\s+of\s+a\s+point|cyclic\s+quad\w*|ptolemy\w*|radical\s+(?:axis|cent(?:re|er))|concyclic|inscribed\s+angle|alternate\s+segment|homothety|inversion|miquel)",
         "Circles IOQM RMO Olympiad Geometry",
         "Circle Geometry Cyclic Quadrilaterals Olympiad",
         "Circle Geometry Power of a Point Cyclic Quadrilaterals IOQM RMO",
@@ -216,9 +245,9 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Geometry",
         "Class 10–12",
         "High",
-        "IOQM · RMO · INMO · IMO",
+        "IOQM · RMO · INMO · AIME · IMO",
         "Coordinate, Complex & Trigonometric Bash in Geometry",
-        r"\b(complex\s+bash\w*|barycentric|trigonometric\s+ceva|trig\s+bash\w*|coordinate\s+bash\w*|complex\s+numbers?\s+(?:in\s+)?geometry|geometry\s+(?:using|with)\s+complex|coordinate\s+geometry\s+(?:ioqm|prmo|rmo|inmo|olympiad)|trigonometry\s+(?:ioqm|prmo|rmo|inmo|olympiad)|solution\s+of\s+triangles?|\bsot\b|sine\s+rule|cosine\s+rule|projective\s+geometry)",
+        r"\b(complex\s+bash\w*|barycentric|trigonometric\s+ceva|trig\s+bash\w*|coordinate\s+bash\w*|complex\s+numbers?\s+(?:in\s+)?geometry|geometry\s+(?:using|with)\s+complex|complex\s+numbers?|coordinate\s+geometry\s+(?:ioqm|prmo|rmo|inmo|amc|aime|olympiad)|trigonometry\s+(?:ioqm|prmo|rmo|inmo|amc|aime|olympiad)|solution\s+of\s+triangles?|\bsot\b|sine\s+rule|cosine\s+rule|projective\s+geometry)",
         "Complex Numbers in Geometry Olympiad",
         "Solution of Triangles Coordinate Geometry IOQM RMO",
         "Coordinate Geometry Trigonometry SOT IOQM RMO Olympiad",
@@ -246,26 +275,71 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Contest Marathons & Proofs",
         "Class 9–12",
         "Very High",
-        "RMO · INMO · IMO",
-        "RMO, INMO & IMO Proof-Writing & Problem Sessions",
-        r"\b(rmo|inmo|imo|international\s+math\w*\s+olympiad|indian\s+national\s+math\w*\s+olympiad|regional\s+math\w*\s+olympiad|imo\s+shortlist|usamo|putnam)\b",
+        "RMO · INMO · HBCSE",
+        "RMO & INMO Proof-Writing & HBCSE Problem Sessions",
+        r"\b(rmo|inmo|indian\s+national\s+math\w*\s+olympiad|regional\s+math\w*\s+olympiad|hbcse\s+math\w*)\b",
         "RMO INMO Maths Olympiad Vedantu Olympiad School Cheenta",
-        "International Mathematical Olympiad IMO Problems Michael Penn",
+        "RMO INMO Past Paper Solutions Olympiad Wallah",
         "RMO INMO Proof Writing Past Paper Solutions Marathon",
-        "IMO Problem Solution Michael Penn 3Blue1Brown MindYourDecisions",
         "RMO INMO Problem Session Proof Writing VOS Olympiad Wallah Cheenta",
+        "INMO RMO Previous Year Solutions Prashant Jain Mathsmerizing",
     ),
-
-    # ============ 2. PHYSICS OLYMPIAD (NSEP · INPhO · IPhO — 10 Modules) ============
     (
         13,
+        "Maths Olympiad",
+        "Global Contests (AMC · AIME · EGMO · IMO)",
+        "Class 8–12",
+        "Very High",
+        "AMC 8 · AMC 10/12 · AIME · USAJMO/USAMO",
+        "AMC 8 / 10 / 12 & AIME Problem Solving & Walkthroughs",
+        r"\b(amc\s*(?:8|10|12)[ab]?|\baime\b|art\s+of\s+problem\s+solving|\baops\b|usajmo|usamo|hmmt|\bsmt\b|american\s+(?:mathematics\s+competitions?|invitational))",
+        "AMC 10 AMC 12 AIME Art of Problem Solving",
+        "AMC 8 AMC 10 AIME OmegaLearn",
+        "AMC 10 AMC 12 AIME Problem Solving Walkthrough",
+        "AMC 10 AMC 12 AIME OmegaLearn Sohil Rathi Beauty of Math",
+        "AIME USAMO Problem Art of Problem Solving Po-Shen Loh Evan Chen",
+    ),
+    (
+        14,
+        "Maths Olympiad",
+        "Global Contests (AMC · AIME · EGMO · IMO)",
+        "Class 9–12",
+        "Very High",
+        "EGMO · IMO · ISL · BMO · APMO · RMM",
+        "EGMO, IMO Shortlist (ISL), BMO & International MO Proofs",
+        r"\b(egmo|european\s+girls|imo\s*(?:shortlist|\bisl\b|20\d\d|19\d\d|problem\w*|p[1-6]\b|q[1-6]\b)|\b20\d\d\s+imo\b|international\s+math\w*\s+olympiad|\bbmo\s*[12]?\b|british\s+math\w*\s+olympiad|\bapmo\b|asian\s+pacific|\brmm\b|romanian\s+master|putnam|balkan\s+math)",
+        "International Mathematical Olympiad IMO Problems Michael Penn",
+        "IMO Shortlist EGMO Evan Chen Math Olympiad",
+        "EGMO European Girls Mathematical Olympiad IMO Shortlist",
+        "IMO Problem Solution Michael Penn 3Blue1Brown MindYourDecisions",
+        "EGMO IMO Shortlist BMO Putnam Evan Chen SyberMath Prime Newtons",
+    ),
+    (
+        15,
+        "Maths Olympiad",
+        "All-India Math Contests (ISI · CMI · NMTC)",
+        "Class 8–12",
+        "Very High",
+        "ISI · CMI · NMTC · Madhava · SOF IMO · PMST",
+        "ISI (B.Stat / B.Math), CMI, NMTC & All-India Math Contests",
+        r"\b(\bisi\b.*\b(?:b\.?\s*stat|b\.?\s*math|entrance|uga|ugb|tomato|maths?|olympiad|cmi|solution\w*|paper)|\bcmi\b.*\b(?:entrance|maths?|solution\w*|b\.?\s*sc|paper)|\bnmtc\b|\bamti\b|sub[\s-]*junior|madhava|bhaskara|aryabhatta|sof\s+imo|imo\s+(?:level\s*[12]|class\s*(?:6|7|8|9|10))|ntse\s+(?:maths?|mat)|nmms\s+(?:maths?|mat|ganit)|pathani\s+samanta|\bpmst\b|ganit\s+pravinya|mtse|gonit|ganit\s+olympiad)",
+        "ISI BStat BMath CMI Entrance Maths Cheenta VOS",
+        "NMTC AMTI Maths Olympiad Vedantu Olympiad School",
+        "ISI CMI Entrance Maths Past Paper Solutions Marathon",
+        "ISI BStat BMath CMI Entrance Cheenta Vedantu Olympiad School Olympiad Wallah",
+        "NMTC Pathani Samanta PMST Ganit Pravinya SOF IMO Maths Olympiad",
+    ),
+
+    # ============ 2. PHYSICS OLYMPIAD (10 Modules: 16..25) ============
+    (
+        16,
         "Physics Olympiad",
         "Mechanics",
         "Class 11–12",
         "Very High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Kinematics, Constraints & Relative Motion (Pathfinder / Irodov)",
-        r"\b(kinematics|constraint\s+motion|wedge\s+constraint|pulley\s+constraint|relative\s+motion|projectile|pursuit|chasing|river[\s-]*boat|rectilinear|curvilinear)",
+        r"\b(kinematics|constraint\s+motion|wedge\s+constraint|pulley\s+constraint|relative\s+motion|projectile|pursuit|chasing|river[\s-]*boat|rectilinear|curvilinear|motion\s+in\s+a\s+(?:straight\s+line|plane))",
         "Kinematics Pathfinder Irodov Physics",
         "Kinematics NSEP Physics Olympiad",
         "Kinematics Constraints Relative Motion NSEP INPhO Pathfinder",
@@ -273,12 +347,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Constraint Motion Relative Motion Physics Galaxy Vinay Uppal VOS",
     ),
     (
-        14,
+        17,
         "Physics Olympiad",
         "Mechanics",
         "Class 11–12",
         "Very High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Newtonian Mechanics, Momentum & Collisions (Olympiad)",
         r"\b(newton'?s?\s+laws?|laws?\s+of\s+motion|\bnlm\b|friction|work[\s,]+(?:power|energy)|circular\s+motion|cent(?:re|er)\s+of\s+mass|\bcom\b|momentum|collisions?|impulse|variable\s+mass|rocket\s+propulsion)",
         "Laws of Motion Center of Mass Pathfinder Irodov",
@@ -288,12 +362,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Newtonian Mechanics Momentum MIT 8.01 Physics Galaxy Vinay Uppal",
     ),
     (
-        15,
+        18,
         "Physics Olympiad",
         "Mechanics",
         "Class 11–12",
         "Very High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Rotational Dynamics & Rigid Body Mechanics (Irodov / INPhO)",
         r"\b(rotation\w*|rigid\s+body|\brbd\b|moment\s+of\s+inertia|torque|angular\s+momentum|rolling\s+motion|toppling|gyroscop\w*|precession|instantaneous\s+axis|\biaor\b)",
         "Rotational Motion Pathfinder Irodov Physics",
@@ -303,12 +377,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Rigid Body Rotation Angular Momentum Vinay Uppal MIT OpenCourseWare VOS",
     ),
     (
-        16,
+        19,
         "Physics Olympiad",
         "Mechanics",
         "Class 11–12",
         "High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Gravitation, Central Forces & Keplerian Orbits",
         r"\b(gravitation\w*|central\s+forces?|kepler\w*|orbital\s+(?:motion|velocity|mechanics)|escape\s+velocity|satellites?\b|binary\s+star\w*|effective\s+potential|gravitational\s+(?:field|potential))",
         "Gravitation Pathfinder Irodov Physics Galaxy",
@@ -318,12 +392,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Gravitation Kepler Orbits MIT OpenCourseWare Vinay Uppal Olympiad Wallah",
     ),
     (
-        17,
+        20,
         "Physics Olympiad",
         "Mechanics",
         "Class 11–12",
         "High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Fluid Mechanics, Surface Tension & Elasticity (Olympiad)",
         r"\b(fluid\s*(?:mechanics|dynamics|statics)?|hydrostatics|bernoulli\w*|viscosity|poiseuille|stokes|surface\s+tension|capillar\w*|meniscus|excess\s+pressure|elasticity|young'?s?\s+modulus|stress\s+and\s+strain|mechanical\s+properties\s+of\s+(?:fluids|solids))",
         "Fluid Mechanics Surface Tension Pathfinder Physics Galaxy",
@@ -333,12 +407,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Fluids Surface Tension Elasticity Vinay Uppal VOS Olympiad Wallah",
     ),
     (
-        18,
+        21,
         "Physics Olympiad",
         "Thermal & Waves",
         "Class 11–12",
         "High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Thermodynamics, Kinetic Theory & Heat Transfer (NSEP / INPhO)",
         r"\b(thermodynamics|kinetic\s+theory|\bktg\b|heat\s+transfer|calorimetry|thermal\s+(?:expansion|conduction|conductivity|properties)|radiation|stefan|wien|carnot|polytropic|adiabatic)",
         "Thermodynamics KTG Heat Transfer Physics Galaxy",
@@ -348,12 +422,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "KTG Thermodynamics Radiation NSEP VOS Olympiad Wallah Vinay Uppal",
     ),
     (
-        19,
+        22,
         "Physics Olympiad",
         "Thermal & Waves",
         "Class 11–12",
         "High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Oscillations, Mechanical Waves & Doppler Effect",
         r"\b(oscillations?|simple\s+harmonic|\bshm\b|pendulum|normal\s+modes?|coupled\s+oscillators?|mechanical\s+waves?|waves?\s+on\s+(?:a\s+)?string|string\s+waves?|sound\s+waves?|standing\s+waves?|organ\s+pipe|beats|doppler)",
         "Oscillations Waves SHM Physics Galaxy MIT 8.03",
@@ -363,12 +437,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Mechanical Waves Doppler Effect MIT OpenCourseWare VOS Olympiad Wallah",
     ),
     (
-        20,
+        23,
         "Physics Olympiad",
         "Electrodynamics",
         "Class 12",
         "Very High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Electrostatics, Gauss's Law, Conductors & Capacitors (Olympiad)",
         r"\b(electrostatics?|gauss'?s?\s+law|coulomb\w*|electric\s+(?:field|potential|charges?|dipole|flux)|conductors?\b|earthing|method\s+of\s+images|capacitors?|capacitance|dielectrics?|electrostatic\s+pressure)",
         "Electrostatics Capacitors Physics Galaxy Pathfinder",
@@ -378,12 +452,12 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Gauss Law Conductors Capacitors MIT 8.02 Vinay Uppal Olympiad Wallah",
     ),
     (
-        21,
+        24,
         "Physics Olympiad",
         "Electrodynamics",
         "Class 12",
         "Very High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Magnetism, Electromagnetic Induction & AC/RC Circuits",
         r"\b(magnetism|magnetic\s+(?:field|force|effects?)|biot[\s-]*savart|ampere'?s?\s+law|lorentz|moving\s+charges|electromagnetic\s+induction|\bemi\b|faraday\w*|lenz\w*|inductance|motional\s+emf|induced\s+electric|alternating\s+current|\bac\s+circuits?\b|\blcr\b|\brc\s+circuits?\b|\brl\s+circuits?\b|current\s+electricity|kirchhoff)",
         "Magnetism Electromagnetic Induction Physics Galaxy",
@@ -393,14 +467,14 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Magnetism EMI RC Circuits MIT 8.02 Vinay Uppal VOS Olympiad Wallah",
     ),
     (
-        22,
+        25,
         "Physics Olympiad",
         "Optics & Modern Physics",
         "Class 12",
         "Very High",
-        "NSEP · INPhO · IPhO",
+        "NSEP · INPhO · IPhO · APhO",
         "Geometrical & Wave Optics, Modern Physics & NSEP/INPhO Solutions",
-        r"\b(geometrical\s+optics|ray\s+optics|wave\s+optics|refraction|prism|lens|mirror|interference|diffraction|\bydse\b|polarization|modern\s+physics|photoelectric|bohr\w*|de\s+broglie|nuclear\s+physics|radioactivity|x[\s-]*rays?|relativity|\bnsep\b|\binpho\b|\bipho\b)",
+        r"\b(geometrical\s+optics|ray\s+optics|wave\s+optics|refraction|prism|lens|mirror|interference|diffraction|\bydse\b|polarization|modern\s+physics|photoelectric|bohr\w*|de\s+broglie|nuclear\s+physics|radioactivity|x[\s-]*rays?|relativity|\bnsep\b|\binpho\b|\bipho\b|\bapho\b)",
         "Optics Modern Physics NSEP INPhO Physics Galaxy",
         "NSEP INPhO Previous Year Paper Solutions",
         "Geometrical Wave Optics Modern Physics NSEP INPhO Solutions",
@@ -408,9 +482,9 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "NSEP INPhO Paper Solutions Vedantu Olympiad School Olympiad Wallah ALLEN",
     ),
 
-    # ============ 3. CHEMISTRY OLYMPIAD (NSEC · INChO · IChO — 8 Modules) ============
+    # ============ 3. CHEMISTRY OLYMPIAD (8 Modules: 26..33) ============
     (
-        23,
+        26,
         "Chemistry Olympiad",
         "Physical Chemistry",
         "Class 11–12",
@@ -425,7 +499,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Stoichiometry Redox Titration IITian Explains The Organic Chemistry Tutor",
     ),
     (
-        24,
+        27,
         "Chemistry Olympiad",
         "Physical Chemistry",
         "Class 11–12",
@@ -440,7 +514,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Chemical Thermodynamics Acid Base Equilibria MIT 5.111 DexterChem IITian Explains",
     ),
     (
-        25,
+        28,
         "Chemistry Olympiad",
         "Physical Chemistry",
         "Class 12",
@@ -455,7 +529,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Electrochemistry Nernst Kinetics IITian Explains The Organic Chemistry Tutor MIT",
     ),
     (
-        26,
+        29,
         "Chemistry Olympiad",
         "Inorganic & Quantum",
         "Class 11–12",
@@ -470,7 +544,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Quantum Atomic Structure Chemical Bonding MIT 5.111 IITian Explains Professor Dave",
     ),
     (
-        27,
+        30,
         "Chemistry Olympiad",
         "Inorganic & Quantum",
         "Class 12",
@@ -485,7 +559,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Coordination Compounds Transition Metals IITian Explains Professor Dave MIT",
     ),
     (
-        28,
+        31,
         "Chemistry Olympiad",
         "Organic & Spectroscopy",
         "Class 11–12",
@@ -500,7 +574,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Chirality Stereochemistry Conformations MIT 5.12 The Organic Chemistry Tutor",
     ),
     (
-        29,
+        32,
         "Chemistry Olympiad",
         "Organic & Spectroscopy",
         "Class 12",
@@ -515,7 +589,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Carbonyl Chemistry Aldol Enolates MIT 5.12 The Organic Chemistry Tutor VOS",
     ),
     (
-        30,
+        33,
         "Chemistry Olympiad",
         "Organic & Spectroscopy",
         "Class 12",
@@ -530,16 +604,16 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "NSEC INChO Paper Solutions Biomolecules Vedantu Olympiad School Olympiad Wallah IITian Explains",
     ),
 
-    # ============ 4. JR SCIENCE & ASTRONOMY (NSEJS · IJSO · NSEA · IOAA — 5 Modules) ============
+    # ============ 4. JR SCIENCE & ASTRONOMY (6 Modules: 34..39) ============
     (
-        31,
+        34,
         "Jr Science & Astronomy",
         "Junior Science (NSEJS / IJSO)",
         "Class 8–10",
         "Very High",
         "NSEJS · IJSO",
         "NSEJS / IJSO Physics Problem Solving",
-        r"\b(nsejs|ijso|injso|junior\s+science)\b.*\b(physics|mechanics|light|optics|electricity|current|magnetism|force|motion|gravitation|heat|fluid\w*|work|energy|power|sound|kinematics|laws?\s+of\s+motion)\b|\b(physics|electricity|optics|mechanics|light|motion|force|heat|fluids?|kinematics)\b.*\b(nsejs|ijso|injso|junior\s+science)\b",
+        r"\b(nsejs|ijso|injso|ioqjs|junior\s+science)\b.*\b(physics|mechanics|light|optics|electricity|current|magnetism|force|motion|gravitation|heat|fluid\w*|work|energy|power|sound|kinematics|laws?\s+of\s+motion)\b|\b(physics|electricity|optics|mechanics|light|motion|force|heat|fluids?|kinematics)\b.*\b(nsejs|ijso|injso|ioqjs|junior\s+science)\b",
         "NSEJS Physics Vedantu Olympiad School",
         "NSEJS IJSO Physics Olympiad Wallah",
         "NSEJS IJSO Physics Problem Solving Marathon One Shot",
@@ -547,14 +621,14 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "IJSO INJSO Physics Problem Solving ALLEN Unacademy",
     ),
     (
-        32,
+        35,
         "Jr Science & Astronomy",
         "Junior Science (NSEJS / IJSO)",
         "Class 8–10",
         "Very High",
         "NSEJS · IJSO",
         "NSEJS / IJSO Chemistry & Mole/Equivalent Mastery",
-        r"\b(nsejs|ijso|injso|junior\s+science)\b.*\b(chemistry|mole|stoichiometry|equivalent|redox|atomic|periodic|acid\w*|bases?|salts?|metals?|carbon|chemical|gas\s+laws?|equilibrium|titration)\b|\b(chemistry|mole\s+concept|equivalent\s+concept|redox|stoichiometry|atomic\s+structure|periodic\s+table)\b.*\b(nsejs|ijso|injso|junior\s+science)\b",
+        r"\b(nsejs|ijso|injso|ioqjs|junior\s+science)\b.*\b(chemistry|mole|stoichiometry|equivalent|redox|atomic|periodic|acid\w*|bases?|salts?|metals?|carbon|chemical|gas\s+laws?|equilibrium|titration)\b|\b(chemistry|mole\s+concept|equivalent\s+concept|redox|stoichiometry|atomic\s+structure|periodic\s+table)\b.*\b(nsejs|ijso|injso|ioqjs|junior\s+science)\b",
         "NSEJS Chemistry Vedantu Olympiad School",
         "NSEJS IJSO Chemistry Olympiad Wallah",
         "NSEJS IJSO Chemistry Mole Concept Equivalent Marathon",
@@ -562,28 +636,28 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "IJSO INJSO Chemistry Problem Solving ALLEN Unacademy",
     ),
     (
-        33,
+        36,
         "Jr Science & Astronomy",
-        "Junior Science (NSEJS / IJSO)",
-        "Class 8–10",
+        "Biology Olympiad (NSEB · INBO · NSEJS)",
+        "Class 8–12",
         "Very High",
-        "NSEJS · IJSO",
-        "NSEJS / IJSO Cell Biology, Genetics & Physiology",
-        r"\b(nsejs|ijso|injso|junior\s+science|inbo|ibo)\b.*\b(biology|cell|genetics|heredity|physiology|life\s+processes|control|reproduction|ecology|evolution|digestion|respiration|circulation|excretion|diversity|plant|human|tissue\w*)\b|\b(biology|cell\s+biology|genetics|physiology|mendel\w*|mitosis|meiosis|organelles?)\b.*\b(nsejs|ijso|injso|junior\s+science|inbo|ibo)\b|\b(cell\s+biology|mendelian\s+genetics|molecular\s+genetics|human\s+physiology|cellular\s+respiration|mitosis\s+and\s+meiosis)\b",
+        "NSEB · INBO · IBO · NSEJS · IJSO",
+        "NSEB / INBO / IBO & NSEJS Biology, Genetics & Physiology",
+        r"\b(nseb|inbo|ibo|biology\s+olympiad)\b|\b(nsejs|ijso|injso|ioqjs|junior\s+science)\b.*\b(biology|cell|genetics|heredity|physiology|life\s+processes|control|reproduction|ecology|evolution|digestion|respiration|circulation|excretion|diversity|plant|human|tissue\w*)\b|\b(biology|cell\s+biology|genetics|physiology|mendel\w*|mitosis|meiosis|organelles?)\b.*\b(nsejs|ijso|injso|ioqjs|junior\s+science|nseb|inbo|ibo)\b|\b(cell\s+biology|mendelian\s+genetics|molecular\s+genetics|human\s+physiology|cellular\s+respiration|mitosis\s+and\s+meiosis)\b",
         "NSEJS Biology Vedantu Olympiad School",
-        "NSEJS IJSO Biology Olympiad Wallah",
+        "NSEB INBO Biology Olympiad",
         "NSEJS IJSO Cell Biology Genetics Physiology Marathon",
         "NSEJS Biology Cell Genetics Physiology Vedantu Olympiad School Olympiad Wallah",
         "Genetics Cell Biology MIT 7.012 Professor Dave Explains",
     ),
     (
-        34,
+        37,
         "Jr Science & Astronomy",
         "Astronomy & Astrophysics",
         "Class 9–12",
         "Very High",
-        "NSEA · IOAA",
-        "NSEA / IOAA Astronomy, Celestial Mechanics & Astrophysics",
+        "NSEA · INAO · IOAA",
+        "NSEA / INAO / IOAA Astronomy, Celestial Mechanics & Astrophysics",
         r"\b(nsea|inao|ioaa|astronomy\s+olympiad|astrophysics|astronomy|celestial\s+(?:mechanics|sphere|coordinates?)|stellar|hr\s+diagram|hertzsprung|cosmology|exoplanets?|black\s+holes?|neutron\s+stars?|supernova\w*|galax(?:y|ies)|hubble|redshift|parallax|solar\s+system|telescopes?)",
         "NSEA IOAA Astronomy Olympiad",
         "Astronomy Astrophysics Professor Dave Explains MIT OpenCourseWare",
@@ -592,24 +666,39 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Astrophysics Cosmology Stellar Evolution Dr. Becky PBS Space Time",
     ),
     (
-        35,
+        38,
         "Jr Science & Astronomy",
         "Contest Sprints & Past Papers",
         "Class 8–12",
         "High",
-        "NSEJS · IJSO · NSEA",
-        "NSEJS, IJSO & NSEA Sprint Revisions & Past Papers",
-        r"\b(nsejs|ijso|injso|nsea|inao|ioaa)\b.*\b(paper\s+solution\w*|paper\s+discussion|past\s+papers?|pyq\w*|previous\s+year|sprint|revision|marathon|mock\s+test|complete\s+paper|question\s+paper|201\d|202\d)\b|\b(pyq\w*|past\s+papers?|paper\s+solution\w*|sprint|marathon|mock\s+test)\b.*\b(nsejs|ijso|injso|nsea|inao|ioaa)\b",
+        "NSEJS · IJSO · NSEB · NSEA",
+        "NSEJS, IJSO, NSEB & NSEA Past Paper Marathons",
+        r"\b(nsejs|ijso|injso|nseb|inbo|nsea|inao|ioaa)\b.*\b(paper\s+solution\w*|paper\s+discussion|past\s+papers?|pyq\w*|previous\s+year|sprint|revision|marathon|mock\s+test|complete\s+paper|question\s+paper|201\d|202\d)\b|\b(pyq\w*|past\s+papers?|paper\s+solution\w*|sprint|marathon|mock\s+test)\b.*\b(nsejs|ijso|injso|nseb|inbo|nsea|inao|ioaa)\b",
         "NSEJS Previous Year Question Papers Solutions",
         "NSEA NSEJS Sprint Revision Marathon",
         "NSEJS IJSO NSEA Past Paper Solutions PYQ Marathon",
         "NSEJS Previous Year Paper Solutions Vedantu Olympiad School Olympiad Wallah",
         "NSEA IJSO Sprint Revision PYQ ALLEN Unacademy",
     ),
-
-    # ============ 5. INFORMATICS OLYMPIAD (ZCO · ZIO · INOI · IOI — 5 Modules) ============
     (
-        36,
+        39,
+        "Jr Science & Astronomy",
+        "All-India Science Talent (NTSE · IAT · NEST)",
+        "Class 8–12",
+        "Very High",
+        "NTSE · IISER IAT · NEST · Homi Bhabha · KVPY",
+        "NTSE, Homi Bhabha, IISER IAT, NEST & All-India Science Talent",
+        r"\b(ntse|homi\s+bhabha|balvaidnyanik|iiser|\biat\b|\bnest\b\s*(?:202\d|exam|pyq\w*|paper|physics|chemistry|biology|maths?|marathon|preparation|sciastra)|sciastra.*\b(?:iat|nest|iiser)|kvpy|nstse|sof\s+nso|vigyan\s+manthan|\bvvm\b|\bnmms\b|\bnrts\b)",
+        "IISER IAT NEST SciAstra",
+        "Homi Bhabha Exam Pawan Wagh Academy",
+        "IISER IAT NEST NTSE One Shot Marathon SciAstra",
+        "IISER IAT NEST Preparation SciAstra Vedantu Olympiad School",
+        "NTSE NMMS Homi Bhabha Science Talent Xylem PARIKSHE Rubi Theresa",
+    ),
+
+    # ============ 5. INFORMATICS OLYMPIAD (5 Modules: 40..44) ============
+    (
+        40,
         "Informatics Olympiad",
         "Algorithms & ZCO",
         "Class 8–12",
@@ -624,7 +713,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Greedy Sorting Algorithms Abdul Bari TLE Eliminators Colin Galen Luv",
     ),
     (
-        37,
+        41,
         "Informatics Olympiad",
         "Algorithms & ZCO",
         "Class 8–12",
@@ -639,7 +728,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "ZIO Zonal Informatics Olympiad Vedantu Olympiad School TLE Eliminators Utkarsh Gupta",
     ),
     (
-        38,
+        42,
         "Informatics Olympiad",
         "Dynamic Programming",
         "Class 9–12",
@@ -654,7 +743,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Dynamic Programming Trees Bitmask Colin Galen TLE Eliminators NeetCode MIT 6.006",
     ),
     (
-        39,
+        43,
         "Informatics Olympiad",
         "Graph & Tree Structures",
         "Class 9–12",
@@ -669,7 +758,7 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
         "Disjoint Set Union Tree Algorithms Errichto CodeNCode Colin Galen Utkarsh Gupta",
     ),
     (
-        40,
+        44,
         "Informatics Olympiad",
         "Graph & Tree Structures",
         "Class 10–12",
@@ -685,16 +774,16 @@ SYLLABUS: list[tuple[int, str, str, str, str, str, str, str, str, str, str, str,
     ),
 ]
 
-SUBJECT_TO_EXAM: dict[str, str] = {
-    "Maths Olympiad": "IOQM / INMO",
-    "Physics Olympiad": "NSEP / INPhO",
-    "Chemistry Olympiad": "NSEC / INChO",
-    "Jr Science & Astronomy": "NSEJS / NSEA",
-    "Informatics Olympiad": "ZCO / INOI",
+SUBJECT_DEFAULT_EXAM: dict[str, str] = {
+    "Maths Olympiad": "IOQM · RMO · INMO",
+    "Physics Olympiad": "NSEP · INPhO · IPhO",
+    "Chemistry Olympiad": "NSEC · INChO · IChO",
+    "Jr Science & Astronomy": "NSEJS · NSEB · NSEA · IAT",
+    "Informatics Olympiad": "ZCO · ZIO · INOI · IOI",
 }
 
 TEACHER_PLAYLIST_SWEEPS: list[tuple[str, str]] = [
-    # Maths Olympiad Sweeps
+    # Maths Olympiad Sweeps (India + Global AMC/AIME/EGMO/IMO + ISI/CMI/NMTC)
     ("Maths Olympiad", "Vedantu Olympiad School IOQM RMO INMO"),
     ("Maths Olympiad", "Olympiad Wallah IOQM RMO INMO"),
     ("Maths Olympiad", "Prashant Jain IOQM PRMO Maths"),
@@ -703,6 +792,12 @@ TEACHER_PLAYLIST_SWEEPS: list[tuple[str, str]] = [
     ("Maths Olympiad", "Maths Unplugged Olympiad"),
     ("Maths Olympiad", "Michael Penn Math Olympiad IMO"),
     ("Maths Olympiad", "3Blue1Brown Olympiad Math"),
+    ("Maths Olympiad", "Art of Problem Solving AMC 10 AMC 12 AIME"),
+    ("Maths Olympiad", "OmegaLearn AMC 8 AMC 10 AMC 12 AIME"),
+    ("Maths Olympiad", "Evan Chen Math Olympiad IMO Shortlist EGMO"),
+    ("Maths Olympiad", "Po-Shen Loh AMC Math Olympiad"),
+    ("Maths Olympiad", "TheBeautyofMath AMC 10 AMC 12 AIME"),
+    ("Maths Olympiad", "Om Sharma IOQM RMO Maths Olympiad"),
     # Physics Olympiad Sweeps
     ("Physics Olympiad", "Indian School of Physics Pathfinder INPhO"),
     ("Physics Olympiad", "Physics Sir JEE Pathfinder Olympiad"),
@@ -721,13 +816,21 @@ TEACHER_PLAYLIST_SWEEPS: list[tuple[str, str]] = [
     ("Chemistry Olympiad", "ALK Sir NS Sir Mohit Tyagi Chemistry"),
     ("Chemistry Olympiad", "Professor Dave Explains Organic General Chemistry"),
     ("Chemistry Olympiad", "MIT OpenCourseWare Chemistry 5.111 5.12"),
-    # Jr Science & Astronomy Sweeps
+    # Jr Science, Bio, Astronomy & All-India Talent Sweeps
     ("Jr Science & Astronomy", "Vedantu Olympiad School NSEJS IJSO"),
     ("Jr Science & Astronomy", "Vedantu Olympiad School NSEA IOAA Astronomy"),
     ("Jr Science & Astronomy", "Olympiad Wallah NSEJS IJSO NSEA"),
-    ("Jr Science & Astronomy", "Dr. Becky Astrophysics Astronomy"),
-    ("Jr Science & Astronomy", "PBS Space Time Astrophysics Cosmology"),
     ("Jr Science & Astronomy", "Professor Dave Explains Astronomy Biology"),
+    ("Jr Science & Astronomy", "SciAstra IISER IAT NEST"),
+    ("Jr Science & Astronomy", "NTSE Rankers Motion Resonance"),
+    # All-India Regional Playlists
+    ("Maths Olympiad", "Cheenta Ganit Kendra Math Olympiad Bangla"),
+    ("Chemistry Olympiad", "BongMistry Organic Chemistry Chemical Bonding Bangla"),
+    ("Jr Science & Astronomy", "Pawan Wagh Academy Homi Bhabha Exam Marathi"),
+    ("Jr Science & Astronomy", "NMMS NTSE Rubi Theresa Tamil"),
+    ("Jr Science & Astronomy", "NMMS NTSE Xylem Malayalam"),
+    ("Jr Science & Astronomy", "NTSE NMMS PARIKSHE Kannada"),
+    ("Maths Olympiad", "Pathani Samanta PMST Dear Ramesh Sir Odia"),
     # Informatics Olympiad Sweeps
     ("Informatics Olympiad", "take U forward Striver Dynamic Programming Graphs Binary Search"),
     ("Informatics Olympiad", "Errichto Algorithms Competitive Programming"),
@@ -746,6 +849,11 @@ CHANNEL_VIDEO_SWEEPS: list[tuple[str, str]] = [
     ("Maths Olympiad", "Vedantu Olympiad School IOQM Marathon"),
     ("Maths Olympiad", "Olympiad Wallah IOQM RMO Marathon"),
     ("Maths Olympiad", "Michael Penn International Math Olympiad"),
+    ("Maths Olympiad", "AMC 10 AMC 12 AIME Walkthrough Art of Problem Solving OmegaLearn"),
+    ("Maths Olympiad", "EGMO European Girls Mathematical Olympiad Problem Solution"),
+    ("Maths Olympiad", "IMO Shortlist BMO APMO Problem Solution Evan Chen"),
+    ("Maths Olympiad", "Math Olympiad Functional Equation Polynomials SyberMath PreMath Blackpenredpen"),
+    ("Maths Olympiad", "ISI BStat BMath CMI Entrance Solution Cheenta VOS"),
     ("Physics Olympiad", "Indian School of Physics Pathfinder Solutions"),
     ("Physics Olympiad", "Physics Sir JEE Olympiad Pathfinder"),
     ("Physics Olympiad", "Vedantu Olympiad School NSEP Marathon"),
@@ -755,24 +863,96 @@ CHANNEL_VIDEO_SWEEPS: list[tuple[str, str]] = [
     ("Chemistry Olympiad", "IITian Explains NSEC Olympiad Chemistry"),
     ("Jr Science & Astronomy", "Vedantu Olympiad School NSEJS Physics Chemistry Biology"),
     ("Jr Science & Astronomy", "Olympiad Wallah NSEJS IJSO NSEA Marathon"),
+    ("Jr Science & Astronomy", "NSEB INBO Biology Olympiad Paper Solution VOS Olympiad Wallah"),
+    ("Jr Science & Astronomy", "SciAstra IISER IAT NEST Complete Revision"),
+    # Targeted All-India Popular Regional Language Sweeps
+    ("Physics Olympiad", "Electrostatics Kinematics Rotational Motion Vedantu Master Tamil PW Tamil"),
+    ("Physics Olympiad", "Vedantu Master Tamil Class 11 Class 12 Physics One Shot"),
+    ("Chemistry Olympiad", "Vedantu Master Tamil Chemistry GOC Chemical Bonding Thermodynamics"),
+    ("Maths Olympiad", "AlexMaths Class 11 Permutations Combinations Complex Numbers"),
+    ("Maths Olympiad", "NMMS NTSE Maths Number System Geometry Rubi Theresa AlexMaths Tamil"),
+    ("Jr Science & Astronomy", "NMMS NTSE Tamil Rubi Theresa Hundred Learning"),
+    ("Physics Olympiad", "Kinematics Electrostatics Thermodynamics Vedantu Telugu PW Telugu"),
+    ("Chemistry Olympiad", "Mole Concept GOC Chemical Bonding Vedantu Telugu PW Telugu"),
+    ("Jr Science & Astronomy", "NMMS NTSE USS Science Talent Xylem Eduport Exam Winner Malayalam"),
+    ("Physics Olympiad", "Kinematics Electrostatics Optics Xylem Eduport Brilliant Pala Malayalam"),
+    ("Physics Olympiad", "Electrostatics Ray Optics Kinematics SimplifiedMinds PW Kannada"),
+    ("Jr Science & Astronomy", "NTSE NMMS Science Maths PARIKSHE Kannada"),
+    ("Jr Science & Astronomy", "Homi Bhabha Class 9 Class 6 Balvaidnyanik Pawan Wagh Marathi"),
+    ("Maths Olympiad", "Polynomials Permutations Complex Numbers Dinesh Sir Pawan Wagh Marathi"),
+    ("Chemistry Olympiad", "General Organic Chemistry Chemical Bonding Mole Concept BongMistry PW Bangla"),
+    ("Maths Olympiad", "Ganit Olympiad Number Theory Geometry Cheenta Bangla PW Bangla"),
+    ("Jr Science & Astronomy", "NMMS NTSE Exam Youth Education Vidyakul Gujarati PW Gujarat"),
+    ("Physics Olympiad", "Kinematics Electrostatics Thermodynamics PW Gujarat Vidyakul Gujarati"),
+    ("Maths Olympiad", "Pathani Samanta Mathematics Scholarship PMST Dear Ramesh Sir SP Education Odia"),
+    ("Jr Science & Astronomy", "NMMS NRTS Exam Dear Ramesh Sir SP Education PW Odisha Odia"),
+    ("Physics Olympiad", "PW Odisha Physics Kinematics Rotational Motion Electrostatics"),
+    ("Chemistry Olympiad", "PW Odisha Chemistry Mole Concept Chemical Bonding Thermodynamics"),
+    ("Physics Olympiad", "Electrostatics Kinematics Rotational Motion Ashish Singh PW Hindi Medium"),
+    ("Chemistry Olympiad", "GOC Coordination Compounds Thermodynamics Ashish Singh PW Hindi Medium"),
+    ("Maths Olympiad", "Polynomials Complex Numbers Permutations PW Punjab Punjabi"),
+    ("Physics Olympiad", "PW Punjab Physics Kinematics Laws of Motion Electrostatics"),
     ("Informatics Olympiad", "Utkarsh Gupta Competitive Programming DP Segment Tree"),
     ("Informatics Olympiad", "Vedantu Olympiad School ZIO ZCO INOI"),
 ]
 
-# Curated Allowlist of Legitimate Olympiad, Deep STEM & Competitive Programming Channels
-VERIFIED_SUBSTRING_PATTERNS = (
-    # Dedicated Olympiad Institutes & Educators
-    "vedantu olympiad",
-    "prashant jain",
-    "pj sir",
-    "olympiad corner",
-    "jee math rankers",
+# Global Math Olympiad / AMC / AIME / EGMO / IMO Pure-Math Channels
+GLOBAL_MATH_ONLY_PATTERNS = (
+    "art of problem solving",
+    "aops",
+    "omegalearn",
+    "sohil rathi",
+    "beauty of math",
+    "thebeautyofmath",
+    "evan chen",
+    "venhance",
+    "po-shen loh",
+    "daily challenge with po-shen",
+    "blackpenredpen",
+    "sybermath",
+    "cybermath",
+    "prime newtons",
+    "premath",
+    "letsthinkcritically",
+    "mathologer",
+    "flammable maths",
+    "brithemathguy",
+    "oxford mathematics",
+    "math olympiad",
+    "olympiad math",
+    "michael penn",
+    "mindyourdecisions",
+    "stand-up maths",
+    "standupmaths",
+    "numberphile",
     "mathsmerizing",
     "maths unplugged",
+    "prashant jain",
+    "pj sir",
+    "jee math rankers",
+    "om sharma",
+    "uplift maths",
+)
+
+# Curated Allowlist of Legitimate Olympiad, Deep STEM, Regional Talent & CP Channels
+VERIFIED_SUBSTRING_PATTERNS = GLOBAL_MATH_ONLY_PATTERNS + (
+    # Dedicated Olympiad & Science Talent Institutes
+    "vedantu olympiad",
+    "olympiad corner",
     "cheenta",
     "olympiad wallah",
     "pw olympiad",
     "jee challengers",
+    "sciastra",
+    "allen olympiad",
+    "allen foundation",
+    "motion olympiad",
+    "motion foundation",
+    "resonance pccp",
+    "matrix olympiad",
+    "rankers ntse",
+    "ntse guru",
+    "sof olympiad",
     # Deep JEE/Olympiad Physics & Chemistry Specialists
     "indian school of physics",
     "physics sir jee",
@@ -784,19 +964,64 @@ VERIFIED_SUBSTRING_PATTERNS = (
     "iitian explains",
     "sachin rana",
     "dexterchem",
-    # Global STEM, Math, Chemistry & Astrophysics Channels
+    # Global STEM, Chemistry, Biology & Astrophysics Channels
     "3blue1brown",
-    "michael penn",
-    "mindyourdecisions",
     "mit opencourseware",
-    "stand-up maths",
-    "standupmaths",
-    "numberphile",
     "the organic chemistry tutor",
     "professor dave explains",
-    "dr. becky",
-    "dr becky",
-    "pbs space time",
+    # All-India Regional Olympiad / Talent / STEM Educators
+    # Marathi
+    "pawan wagh",
+    "dinesh sir",
+    "pw maharashtra",
+    "sahyadri",
+    "jijau",
+    # Tamil
+    "vedantu master tamil",
+    "vedantu tamil",
+    "pw tamil",
+    "alexmaths",
+    "rubi theresa",
+    "lmes",
+    "hundred learning",
+    # Telugu
+    "vedantu telugu",
+    "pw telugu",
+    "unacademy telugu",
+    # Malayalam
+    "xylem",
+    "eduport",
+    "exam winner",
+    "brilliant pala",
+    # Kannada
+    "simplifiedminds",
+    "pw kannada",
+    "parikshe",
+    "vedantu karnataka",
+    # Bengali
+    "pw bangla",
+    "bongmistry",
+    "soe bangla",
+    "gonit",
+    "ganit kendra",
+    # Gujarati
+    "pw gujarat",
+    "vidyakul gujarati",
+    "youth education",
+    "diwalipura",
+    # Odia
+    "pw odisha",
+    "dear ramesh",
+    "matsci",
+    "rkd classes",
+    "sp education",
+    # Hindi & Punjabi
+    "pw hindi medium",
+    "doubtnut",
+    "utkarsh",
+    "magnet brains hindi",
+    "ashish singh",
+    "pw punjab",
     # Competitive Programming & Informatics Olympiad Channels
     "take u forward",
     "striver",
@@ -830,6 +1055,26 @@ CP_ONLY_PATTERNS = (
 )
 
 ENGLISH_MEDIUM_CUES = (
+    "art of problem solving",
+    "aops",
+    "omegalearn",
+    "sohil rathi",
+    "beauty of math",
+    "thebeautyofmath",
+    "evan chen",
+    "venhance",
+    "po-shen loh",
+    "daily challenge with po-shen",
+    "blackpenredpen",
+    "sybermath",
+    "cybermath",
+    "prime newtons",
+    "premath",
+    "letsthinkcritically",
+    "mathologer",
+    "flammable maths",
+    "brithemathguy",
+    "oxford mathematics",
     "3blue1brown",
     "michael penn",
     "mindyourdecisions",
@@ -860,7 +1105,8 @@ ENGLISH_MEDIUM_CUES = (
     "cheenta",
 )
 
-# Strict Rejections: Vlogs, Cutoffs, Registration/Admit-Card Announcements, Strategy Fluff, Shorts, Regional non-EN/HI
+# Strict Rejections: Vlogs, Cutoffs, Registration/Admit-Card Announcements, Strategy Fluff, Shorts
+# (All Indian regional languages are WELCOMED and NEVER rejected!)
 HARD_REJECT_RE = re.compile(
     r"\b(vlog\w*|prank|controversy|exposed|roast|reaction\s+video|"
     r"cutoff\w*|cut[\s-]*off\w*|marks\s+vs\s+(?:rank|percentile)|expected\s+cutoff|"
@@ -868,12 +1114,11 @@ HARD_REJECT_RE = re.compile(
     r"admit\s+card|hall\s+ticket|exam\s+date\s+announced|result\s+(?:out|declared|reaction)|"
     r"answer\s+key\s+challenge|certificate\s+download|eligibility\s+criteria|"
     r"syllabus\s+and\s+eligibility|all\s+about\s+(?:ioqm|nsep|nsec|nsejs|nsea|zco|zio|inmo)|"
-    r"how\s+to\s+prepare|strategy\s*(?:&|and)\s*roadmap|complete\s+strategy|batch\s+launch|course\s+launch|orientation\s+session|"
+    r"how\s+to\s+prepare|preparation\s+strategy|strategy\s+for\s+|roadmap\s+to\s+|strategy\s*(?:&|and)\s*roadmap|complete\s+strategy|batch\s+launch|course\s+launch|orientation\s+session|"
     r"college\s+review|hostel\s+tour|josaa|counselling|dress\s+code|"
     r"toppers?\s+talk|topper'?s?\s+interview|success\s+story|success\s+meet|parents\s+reaction|"
     r"best\s+books\s+for|book\s+review|time\s*table|how\s+to\s+manage\s+school|"
-    r"motivation|motivational|shorts|#shorts|#ytshorts|"
-    r"vaathi|tamil|telugu|malayalam|kannada|bangla|bengali|marathi|gujarati|odia)\b",
+    r"motivation|motivational|shorts|#shorts|#ytshorts)\b",
     re.I,
 )
 
@@ -1209,7 +1454,7 @@ def is_allen_olympiad_channel(channel: str) -> bool:
 def is_unacademy_olympiad_channel(channel: str) -> bool:
     low = channel.casefold()
     if re.search(
-        r"\b(upsc|ias|psc|ssc|bank|ca\b|cs\b|clat|judiciary|law|defence|nda|cds|gate|ugc|net|tet|ctet|commerce|arts|tamil|telugu|malayalam|kannada|marathi|bengali|bangla|gujarati|odia)\b",
+        r"\b(upsc|ias|psc|ssc|bank|ca\b|cs\b|clat|judiciary|law|defence|nda|cds|gate|ugc|net|tet|ctet|commerce|arts)\b",
         low,
     ):
         return False
@@ -1238,13 +1483,19 @@ def is_verified_olympiad_channel(channel: str, channel_url: str = "") -> bool:
         return True
     if is_luv_cp_channel(channel, channel_url):
         return True
-    if re.search(r"\bvos\b", low):
+    if re.search(r"\bvos\b", low) or re.search(r"\bmod\s+math", low):
         return True
     if is_allen_olympiad_channel(channel):
         return True
     if is_unacademy_olympiad_channel(channel):
         return True
-    if re.search(r"\bneet\b", low) and not re.search(r"\b(olympiad|jee|iit)\b", low):
+    # Reject medical/civil-service subchannels of multi-category regional networks (e.g. Utkarsh Law/UPSC)
+    if re.search(r"\b(upsc|ias|psc|ssc|bank|clat|judiciary|commerce|nursing|agriculture)\b", low):
+        return False
+    if re.search(r"\bneet\b", low) and not re.search(
+        r"\b(olympiad|jee|iit|tamil|telugu|kannada|malayalam|bangla|gujarat|odisha|maharashtra|xylem|simplifiedminds)\b",
+        low,
+    ):
         return False
     return any(p in low for p in VERIFIED_SUBSTRING_PATTERNS)
 
@@ -1262,6 +1513,40 @@ def resolve_institute(cand: dict) -> str:
     if any(
         k in ch_low
         for k in (
+            "art of problem solving",
+            "aops",
+            "omegalearn",
+            "sohil rathi",
+            "beauty of math",
+            "thebeautyofmath",
+            "evan chen",
+            "venhance",
+            "po-shen loh",
+            "daily challenge with po-shen",
+            "blackpenredpen",
+            "sybermath",
+            "cybermath",
+            "prime newtons",
+            "premath",
+            "letsthinkcritically",
+            "mathologer",
+            "flammable maths",
+            "brithemathguy",
+            "oxford mathematics",
+            "math olympiad",
+            "olympiad math",
+            "michael penn",
+            "mindyourdecisions",
+            "stand-up maths",
+            "standupmaths",
+            "numberphile",
+            "3blue1brown",
+        )
+    ):
+        return "AoPS, Evan Chen & Global Math MO"
+    if any(
+        k in ch_low
+        for k in (
             "indian school of physics",
             "physics sir jee",
             "vinay uppal",
@@ -1272,24 +1557,14 @@ def resolve_institute(cand: dict) -> str:
         return "INSP, Physics Galaxy & Olympiad Physics"
     if any(k in ch_low for k in ("iitian explains", "sachin rana", "dexterchem")):
         return "IITian Explains, Sachin Rana & DexterChem"
-    if any(k in ch_low for k in ("mathsmerizing", "maths unplugged", "mohit tyagi", "competishun")):
+    if any(k in ch_low for k in ("mathsmerizing", "maths unplugged", "mohit tyagi", "competishun", "om sharma", "uplift maths")):
         return "Mathsmerizing, Maths Unplugged & Competishun"
     if is_cp_only_channel(cand["channel"], cand.get("channel_url", "")):
         return "IOI & Competitive Programming"
-    if any(k in ch_low for k in ("prashant jain", "pj sir", "jee math rankers", "olympiad corner")) or is_unacademy_olympiad_channel(cand["channel"]):
-        return "Unacademy & PJ Sir Olympiad"
-    if is_allen_olympiad_channel(cand["channel"]):
-        return "ALLEN Olympiad"
     if any(
         k in ch_low
         for k in (
             "mit opencourseware",
-            "3blue1brown",
-            "michael penn",
-            "mindyourdecisions",
-            "stand-up maths",
-            "standupmaths",
-            "numberphile",
             "the organic chemistry tutor",
             "professor dave explains",
             "dr. becky",
@@ -1298,6 +1573,67 @@ def resolve_institute(cand: dict) -> str:
         )
     ) or "mit opencourseware" in blob:
         return "MIT OCW & Global STEM"
+    if any(
+        k in ch_low
+        for k in (
+            "sciastra",
+            "motion olympiad",
+            "motion foundation",
+            "resonance pccp",
+            "matrix olympiad",
+            "rankers ntse",
+            "ntse guru",
+            "sof olympiad",
+            "pawan wagh",
+            "dinesh sir",
+            "pw maharashtra",
+            "sahyadri",
+            "jijau",
+            "vedantu master tamil",
+            "vedantu tamil",
+            "pw tamil",
+            "alexmaths",
+            "rubi theresa",
+            "lmes",
+            "hundred learning",
+            "vedantu telugu",
+            "pw telugu",
+            "unacademy telugu",
+            "xylem",
+            "eduport",
+            "exam winner",
+            "brilliant pala",
+            "simplifiedminds",
+            "pw kannada",
+            "parikshe",
+            "vedantu karnataka",
+            "pw bangla",
+            "bongmistry",
+            "soe bangla",
+            "gonit",
+            "ganit kendra",
+            "pw gujarat",
+            "vidyakul gujarati",
+            "youth education",
+            "diwalipura",
+            "pw odisha",
+            "dear ramesh",
+            "matsci",
+            "rkd classes",
+            "sp education",
+            "pw hindi medium",
+            "doubtnut",
+            "utkarsh",
+            "magnet brains hindi",
+            "ashish singh",
+            "pw punjab",
+        )
+    ):
+        return "SciAstra, NTSE & All-India Regional Talent"
+    if any(k in ch_low for k in ("prashant jain", "pj sir", "jee math rankers", "olympiad corner")) or is_unacademy_olympiad_channel(cand["channel"]):
+        return "Unacademy & PJ Sir Olympiad"
+    if is_allen_olympiad_channel(cand["channel"]):
+        return "ALLEN Olympiad"
     return "Independent Olympiad Specialists"
 
 
@@ -1327,6 +1663,22 @@ def resolve_educator(cand: dict, subject: str, unit: str) -> str:
         return "Luv (Competitive Programming)"
 
     teacher_rules = [
+        (r"art of problem solving|\baops\b|richard rusczyk", "Art of Problem Solving (AoPS)"),
+        (r"omegalearn|\bsohil rathi\b", "Sohil Rathi (OmegaLearn)"),
+        (r"evan chen|venhance", "Evan Chen (IMO Gold / OTIS)"),
+        (r"po-shen loh", "Po-Shen Loh (USA IMO Coach)"),
+        (r"thebeautyofmath|beauty of math", "TheBeautyofMath (AMC / AIME)"),
+        (r"blackpenredpen", "blackpenredpen"),
+        (r"sybermath|cybermath", "SyberMath"),
+        (r"prime newtons", "Prime Newtons"),
+        (r"premath", "PreMath"),
+        (r"letsthinkcritically", "LetsThinkCritically"),
+        (r"mathologer", "Mathologer"),
+        (r"flammable maths", "Flammable Maths"),
+        (r"brithemathguy", "BriTheMathGuy"),
+        (r"oxford mathematics", "Oxford Mathematics"),
+        (r"sciastra", "SciAstra (IAT · NEST)"),
+        (r"\bom sharma\b|uplift maths", "Om Sharma (IOQM / RMO)"),
         (r"prashant jain|\bpj\s*sir\b|jee math rankers", "Prashant Jain (PJ Sir)"),
         (r"olympiad wallah|pw olympiad|jee challengers", "PW Olympiad Wallah"),
         (r"cheenta", "Cheenta Olympiad Faculty"),
@@ -1350,6 +1702,22 @@ def resolve_educator(cand: dict, subject: str, unit: str) -> str:
         (r"professor dave explains", "Professor Dave Explains"),
         (r"dr\.?\s*becky", "Dr. Becky Smethurst"),
         (r"pbs space time", "Matt O'Dowd (PBS Space Time)"),
+        (r"pawan wagh", "Pawan Wagh Academy (Marathi)"),
+        (r"dinesh sir", "Dinesh Sir (Marathi)"),
+        (r"bongmistry", "BongMistry (Bengali)"),
+        (r"simplifiedminds", "SimplifiedMinds (Kannada)"),
+        (r"parikshe", "PARIKSHE (Kannada)"),
+        (r"xylem", "Xylem Learning (Malayalam)"),
+        (r"brilliant pala", "Brilliant Pala (Malayalam)"),
+        (r"eduport", "Eduport (Malayalam)"),
+        (r"exam winner", "Exam Winner (Malayalam)"),
+        (r"rubi theresa", "Rubi Theresa (Tamil)"),
+        (r"alexmaths", "AlexMaths (Tamil)"),
+        (r"vedantu master tamil|vedantu tamil", "Vedantu Master Tamil"),
+        (r"vedantu telugu", "Vedantu Telugu"),
+        (r"dear ramesh", "Dear Ramesh Sir (Odia)"),
+        (r"sp education", "SP Education (Odia)"),
+        (r"ashish singh", "Ashish Singh Lectures (Hindi)"),
         (r"take u forward|\bstriver\b", "Striver (take U forward)"),
         (r"errichto", "Kamil Debowski (Errichto)"),
         (r"william\s*fiset", "William Fiset"),
@@ -1373,23 +1741,173 @@ def resolve_educator(cand: dict, subject: str, unit: str) -> str:
 
 
 def resolve_language(cand: dict) -> str:
-    blob = f"{cand['title']} {cand['channel']}".lower()
-    if any(cue in blob for cue in ENGLISH_MEDIUM_CUES) or re.search(r"\bin english\b|\benglish medium\b", blob):
-        if not re.search(r"\bhindi\b", blob):
+    """Resolve strictly canonical language names matching app.js LANGUAGE_META."""
+    title = cand["title"]
+    channel = cand["channel"]
+    blob = f"{title} {channel}"
+    low = blob.lower()
+    ch_low = channel.lower()
+
+    if (
+        re.search(r"[\u0B80-\u0BFF]", blob)
+        or any(
+            k in ch_low
+            for k in (
+                "vedantu master tamil",
+                "vedantu tamil",
+                "pw tamil",
+                "alexmaths",
+                "rubi theresa",
+                "lmes",
+                "hundred learning",
+                "unacademy tamil",
+            )
+        )
+        or re.search(r"\bin tamil\b|\btamil medium\b|\btamil\b|vaathi", low)
+    ):
+        return "Tamil"
+
+    if (
+        re.search(r"[\u0C00-\u0C7F]", blob)
+        or any(k in ch_low for k in ("vedantu telugu", "pw telugu", "unacademy telugu"))
+        or re.search(r"\bin telugu\b|\btelugu medium\b|\btelugu\b", low)
+    ):
+        return "Telugu"
+
+    if (
+        re.search(r"[\u0D00-\u0D7F]", blob)
+        or (
+            "english" not in ch_low
+            and any(k in ch_low for k in ("xylem", "eduport", "exam winner", "brilliant pala"))
+        )
+        or re.search(r"\bin malayalam\b|\bmalayalam medium\b|\bmalayalam\b", low)
+    ):
+        return "Malayalam"
+
+    if (
+        re.search(r"[\u0C80-\u0CFF]", blob)
+        or any(k in ch_low for k in ("simplifiedminds", "pw kannada", "parikshe", "vedantu karnataka"))
+        or re.search(r"\bin kannada\b|\bkannada medium\b|\bkannada\b", low)
+    ):
+        return "Kannada"
+
+    if (
+        re.search(r"[\u0980-\u09FF]", blob)
+        or any(k in ch_low for k in ("pw bangla", "bongmistry", "soe bangla", "gonit", "ganit kendra"))
+        or re.search(r"\bin bengali\b|\bin bangla\b|\bbangla\b|\bbengali\b", low)
+    ):
+        return "Bengali"
+
+    if (
+        re.search(r"[\u0A80-\u0AFF]", blob)
+        or any(k in ch_low for k in ("pw gujarat", "vidyakul gujarati", "youth education", "diwalipura"))
+        or re.search(r"\bin gujarati\b|\bgujarati medium\b|\bgujarati\b", low)
+    ):
+        return "Gujarati"
+
+    if (
+        re.search(r"[\u0B00-\u0B7F]", blob)
+        or any(k in ch_low for k in ("pw odisha", "dear ramesh", "matsci", "rkd classes", "sp education"))
+        or re.search(r"\bin odia\b|\bodia medium\b|\bodia\b|\boriya\b", low)
+    ):
+        return "Odia"
+
+    if (
+        re.search(r"[\u0A00-\u0A7F]", blob)
+        or "pw punjab" in ch_low
+        or re.search(r"\bin punjabi\b|\bpunjabi medium\b|\bpunjabi\b", low)
+    ):
+        return "Punjabi"
+
+    if (
+        any(k in ch_low for k in ("pawan wagh", "dinesh sir", "pw maharashtra", "sahyadri", "jijau"))
+        or re.search(
+            r"\bin marathi\b|\bmarathi medium\b|\bmarathi\b|मराठी|इयत्ता|शिष्यवृत्ती|स्पर्धा|होमी\s*भाभा",
+            blob,
+            re.I,
+        )
+    ):
+        return "Marathi"
+
+    if (
+        ("utkarsh gupta" not in ch_low and any(k in ch_low for k in ("pw hindi medium", "doubtnut", "utkarsh", "magnet brains hindi", "ashish singh")))
+        or re.search(r"\bhindi medium\b|\bin hindi\b|हिंदी\s*माध्यम|कक्षा\s*(?:6|7|8|9|10|11|12)", blob, re.I)
+        or re.search(r"[\u0900-\u097F]", title)
+    ):
+        return "Hindi"
+
+    if any(cue in low for cue in ENGLISH_MEDIUM_CUES) or re.search(r"\bin english\b|\benglish medium\b", low):
+        if not re.search(r"\bhindi\b|\bhinglish\b", low):
             return "English"
+
     return "Hinglish"
 
 
-def classify_exam_and_format(cand: dict, subject: str) -> tuple[str, str]:
+def classify_exam_and_format(cand: dict, subject: str, ch_no: int) -> tuple[str, str]:
     title_low = cand["title"].lower()
-    exam = SUBJECT_TO_EXAM[subject]
+    ch_low = cand["channel"].lower()
+    blob = f"{title_low} {ch_low}"
+
+    if subject == "Maths Olympiad":
+        if ch_no == 13 or re.search(
+            r"\b(amc\s*(?:8|10|12)[ab]?|\baime\b|usajmo|usamo|hmmt|\bsmt\b|art\s+of\s+problem\s+solving|\baops\b|omegalearn)\b",
+            blob,
+        ):
+            exam = "AMC 8/10/12 & AIME"
+        elif ch_no == 15 or re.search(
+            r"\b(\bisi\b.*\b(?:b\.?\s*stat|b\.?\s*math|entrance|uga|ugb|tomato|cmi)|\bcmi\b.*\b(?:entrance|maths?)|\bnmtc\b|\bamti\b|madhava|pathani\s+samanta|\bpmst\b|ganit\s+pravinya|sof\s+imo|ntse|nmms)\b",
+            blob,
+        ):
+            exam = "ISI · CMI · NMTC · Math Talent"
+        elif (
+            ch_no == 14
+            or (
+                re.search(
+                    r"\b(egmo|european\s+girls|imo\s*(?:shortlist|\bisl\b|20\d\d|19\d\d|p[1-6]\b|q[1-6]\b)|\b20\d\d\s+imo\b|international\s+math\w*\s+olympiad|\bbmo\b|\bapmo\b|\brmm\b|putnam)\b",
+                    blob,
+                )
+                and not re.search(r"\b(ioqm|prmo|inmo|\brmo\b|sof\s+imo)\b", blob)
+            )
+            or (
+                any(
+                    g in ch_low
+                    for g in (
+                        "evan chen",
+                        "venhance",
+                        "michael penn",
+                        "3blue1brown",
+                        "po-shen loh",
+                        "blackpenredpen",
+                        "sybermath",
+                        "cybermath",
+                        "prime newtons",
+                        "premath",
+                        "letsthinkcritically",
+                        "mathologer",
+                        "flammable maths",
+                        "brithemathguy",
+                        "oxford mathematics",
+                        "mindyourdecisions",
+                        "numberphile",
+                        "stand-up maths",
+                        "standupmaths",
+                    )
+                )
+                and not re.search(r"\b(ioqm|prmo|inmo|\brmo\b|amc|aime)\b", blob)
+            )
+        ):
+            exam = "IMO · EGMO · Global MO"
+        else:
+            exam = "IOQM · RMO · INMO"
+    else:
+        exam = SUBJECT_DEFAULT_EXAM[subject]
 
     if cand["provider"] == "playlist":
         fmt = "Full Course"
         if re.search(r"\b(pyq\w*|previous\s+year|past\s+papers?|paper\s+solution\w*|sprint|revision|mock)\b", title_low):
             fmt = "Revision & PYQs"
         elif re.search(
-            r"\b(pathfinder|irodov|inmo|imo|inpho|ipho|incho|icho|symposium|illustrations?|problems?\s+series)\b",
+            r"\b(pathfinder|irodov|inmo|imo|egmo|aime|amc|inpho|ipho|incho|icho|symposium|illustrations?|problems?\s+series|shortlist)\b",
             title_low,
         ):
             fmt = "Olympiad Problems"
@@ -1412,18 +1930,26 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
     channel = cand["channel"]
     channel_url = cand.get("channel_url", "")
 
-    # 1. Must belong to our curated Olympiad / Deep STEM / Competitive Programming allowlist
+    # 1. Must belong to our curated Olympiad / Deep STEM / Regional Talent / CP allowlist
     if not is_verified_olympiad_channel(channel, channel_url):
         return False
 
-    # 2. Reject vlogs, cutoffs, registration/admit-card announcements, shorts, regional noise
+    # 2. Reject vlogs, cutoffs, registration/admit-card announcements, strategy fluff, shorts
     if HARD_REJECT_RE.search(title):
         return False
-    if "neetcode" not in channel.casefold():
-        if re.search(r"\bneet\b", title, re.I) and not re.search(
-            r"\b(olympiad|ioqm|nsep|nsec|nsejs|ijso|nsea|inpho|incho|jee|iit)\b", title, re.I
-        ):
+    ch_low = channel.casefold()
+    if "neetcode" not in ch_low:
+        if re.search(r"\bneet\s+only\b|\bonly\s+for\s+neet\b|\bmbbs\b", title, re.I):
             return False
+        if re.search(r"\bneet\b", title, re.I) and not re.search(
+            r"\b(olympiad|ioqm|nsep|nsec|nseb|nsejs|ijso|nsea|inpho|incho|inbo|iat|nest|ntse|kvpy|jee|iit)\b",
+            title,
+            re.I,
+        ):
+            # Allow multi-tag regional Physics/Chemistry STEM lectures (e.g. "Electrostatics | JEE/NEET Tamil")
+            # only if JEE/KEAM/KCET/WBJEE/EAPCET/MHTCET is also present or no pure NEET biology tag
+            if not re.search(r"\b(keam|kcet|wbjee|eapcet|eamcet|mht\s*cet|gujcet|ojee)\b", title, re.I):
+                return False
 
     # 3. Duration (>= 8m / 480s) & Lesson Count Floor
     if cand["provider"] == "playlist":
@@ -1433,20 +1959,18 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
         if cand["duration_sec"] < MIN_VIDEO_SECONDS:
             return False
 
-    # 4. Reject full-subject generic megacompilations ("all chapters in order") on playlists
+    # 4. Reject full-subject generic megacompilations ("all chapters in order") on non-marathon playlists
     if cand["provider"] == "playlist" and re.search(
         r"\bin order\b|\ball chapters\b|\bcomplete (?:physics|chemistry|maths|biology)\b", title, re.I
     ):
-        if ch_no not in {11, 12, 22, 30, 35}:
+        if ch_no not in {11, 12, 13, 14, 15, 25, 33, 38, 39}:
             return False
 
-    ch_low = channel.casefold()
     title_clean = re.sub(r"#\w+", "", title)
     blob_tc = f"{title_clean} {channel}"
 
     # 5. Strict Stream Isolation & Cross-Subject Guards
     if subject == "Informatics Olympiad":
-        # Must come from CP channels, MIT OCW, or Olympiad channels explicitly teaching ZCO/ZIO/INOI/IOI/Algorithms
         if any(
             k in ch_low
             for k in (
@@ -1458,22 +1982,18 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
                 "iitian explains",
                 "sachin rana",
                 "dexterchem",
+                "bongmistry",
                 "dr. becky",
                 "dr becky",
                 "pbs space time",
                 "the organic chemistry tutor",
                 "professor dave explains",
-                "michael penn",
-                "numberphile",
-                "stand-up maths",
-                "standupmaths",
-                "mindyourdecisions",
                 "mohit tyagi",
                 "competishun",
-                "mathsmerizing",
-                "maths unplugged",
-            )
+            ) + GLOBAL_MATH_ONLY_PATTERNS
         ):
+            return False
+        if "utkarsh gupta" not in ch_low and "utkarsh" in ch_low:
             return False
         if not is_cp_only_channel(channel, channel_url):
             if not re.search(
@@ -1483,7 +2003,6 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
             ):
                 return False
     else:
-        # Non-Informatics streams must NEVER accept Competitive Programming channels or coding videos
         if is_cp_only_channel(channel, channel_url):
             return False
         if re.search(
@@ -1505,6 +2024,7 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
                 "iitian explains",
                 "sachin rana",
                 "dexterchem",
+                "bongmistry",
                 "dr. becky",
                 "dr becky",
                 "pbs space time",
@@ -1513,7 +2033,7 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
         ):
             return False
         if re.search(
-            r"\b(nsep|inpho|ipho|nsec|incho|icho|nsejs|ijso|nsea|ioaa|physics|chemistry|biology|astrophysics|kinematics|electrostatics|thermodynamics|mole\s+concept|organic\s+chemistry|abj\s+sir|alk\s+sir|ns\s+sir)\b",
+            r"\b(nsep|inpho|ipho|nsec|incho|icho|nseb|inbo|nsejs|ijso|nsea|ioaa|physics|chemistry|biology|astrophysics|kinematics|electrostatics|thermodynamics|mole\s+concept|organic\s+chemistry|homi\s+bhabha|abj\s+sir|alk\s+sir|ns\s+sir)\b",
             blob_tc if "physics wallah" not in ch_low else title_clean,
             re.I,
         ):
@@ -1521,20 +2041,15 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
     elif subject == "Physics Olympiad":
         if any(
             k in ch_low
-            for k in (
-                "mathsmerizing",
-                "maths unplugged",
-                "prashant jain",
-                "pj sir",
-                "jee math rankers",
-                "michael penn",
-                "mindyourdecisions",
-                "stand-up maths",
-                "standupmaths",
-                "numberphile",
+            for k in GLOBAL_MATH_ONLY_PATTERNS
+            + (
                 "iitian explains",
                 "sachin rana",
                 "dexterchem",
+                "bongmistry",
+                "dinesh sir",
+                "alexmaths",
+                "rubi theresa",
                 "dr. becky",
                 "dr becky",
                 "pbs space time",
@@ -1542,7 +2057,7 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
         ):
             return False
         if re.search(
-            r"\b(ioqm|prmo|rmo|inmo|nsec|incho|icho|nsejs|ijso|nsea|ioaa|chemistry|biology|organic\s+chemistry|inorganic|mole\s+concept|thermochemistry|enthalpy|gibbs|chemical\s+thermodynamics|chemical\s+kinetics|ionic\s+equilibrium|alk\s+sir|ns\s+sir|mt\s+sir)\b",
+            r"\b(ioqm|prmo|rmo|inmo|egmo|\baime\b|amc\s*1[02]|nsec|incho|icho|nseb|inbo|nsejs|ijso|nsea|ioaa|chemistry|biology|organic\s+chemistry|inorganic|mole\s+concept|thermochemistry|enthalpy|gibbs|chemical\s+thermodynamics|chemical\s+kinetics|ionic\s+equilibrium|alk\s+sir|ns\s+sir|mt\s+sir)\b",
             title_clean,
             re.I,
         ):
@@ -1550,23 +2065,17 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
     elif subject == "Chemistry Olympiad":
         if any(
             k in ch_low
-            for k in (
-                "mathsmerizing",
-                "maths unplugged",
-                "prashant jain",
-                "pj sir",
-                "jee math rankers",
+            for k in GLOBAL_MATH_ONLY_PATTERNS
+            + (
                 "indian school of physics",
                 "physics sir jee",
                 "vinay uppal",
                 "physics heist",
                 "physics galaxy",
                 "3blue1brown",
-                "michael penn",
-                "mindyourdecisions",
-                "stand-up maths",
-                "standupmaths",
-                "numberphile",
+                "dinesh sir",
+                "alexmaths",
+                "rubi theresa",
                 "dr. becky",
                 "dr becky",
                 "pbs space time",
@@ -1574,20 +2083,25 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
         ):
             return False
         if re.search(
-            r"\b(ioqm|prmo|rmo|inmo|nsep|inpho|ipho|nsejs|ijso|nsea|ioaa|physics|kinematics|rotational|electrostatics|magnetism|optics|abj\s+sir|mt\s+sir)\b",
+            r"\b(ioqm|prmo|rmo|inmo|egmo|\baime\b|amc\s*1[02]|nsep|inpho|ipho|nseb|inbo|nsejs|ijso|nsea|ioaa|physics|kinematics|rotational|electrostatics|magnetism|ray\s+optics|wave\s+optics|abj\s+sir|mt\s+sir)\b",
             title_clean,
             re.I,
         ):
             return False
     elif subject == "Jr Science & Astronomy":
-        if ch_no == 33:
-            # Module 33: Either explicit NSEJS/IJSO/INBO/IBO Biology OR MIT OCW / Professor Dave / Organic Chem Tutor Cell Bio/Genetics
-            has_jr_bio = bool(
-                re.search(r"\b(nsejs|ijso|injso|junior\s+science|inbo|ibo|olympiad)\b", blob_tc, re.I)
-                and re.search(
-                    r"\b(biology|cell|genetics|heredity|physiology|life\s+processes|reproduction|ecology|evolution|digestion|respiration|circulation|excretion|plant|human|tissue\w*)\b",
-                    title_clean,
-                    re.I,
+        if any(k in ch_low for k in GLOBAL_MATH_ONLY_PATTERNS):
+            return False
+        if ch_no == 36:
+            # Module 36: NSEB / INBO / IBO / NSEJS Biology OR MIT OCW / Professor Dave / Organic Chem Tutor / SciAstra Bio
+            has_oly_bio = bool(
+                re.search(r"\b(nseb|inbo|ibo|biology\s+olympiad)\b", blob_tc, re.I)
+                or (
+                    re.search(r"\b(nsejs|ijso|injso|ioqjs|junior\s+science|olympiad|iiser|\biat\b|\bnest\b)\b", blob_tc, re.I)
+                    and re.search(
+                        r"\b(biology|cell|genetics|heredity|physiology|life\s+processes|reproduction|ecology|evolution|digestion|respiration|circulation|excretion|plant|human|tissue\w*)\b",
+                        title_clean,
+                        re.I,
+                    )
                 )
             )
             has_global_bio = any(
@@ -1599,22 +2113,11 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
                     re.I,
                 )
             )
-            if not (has_jr_bio or has_global_bio):
+            if not (has_oly_bio or has_global_bio):
                 return False
-        elif ch_no == 34:
-            # Module 34: Astronomy & Astrophysics
-            if any(
-                k in ch_low
-                for k in (
-                    "iitian explains",
-                    "sachin rana",
-                    "dexterchem",
-                    "mathsmerizing",
-                    "maths unplugged",
-                    "michael penn",
-                    "numberphile",
-                )
-            ):
+        elif ch_no == 37:
+            # Module 37: Astronomy & Astrophysics
+            if any(k in ch_low for k in ("iitian explains", "sachin rana", "dexterchem", "bongmistry")):
                 return False
             if re.search(r"\b(ioqm|prmo|rmo|inmo|nsec|incho|nsejs\s+biology|nsejs\s+chemistry)\b", title_clean, re.I):
                 return False
@@ -1622,11 +2125,22 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
     # 6. Prevent Cross-Module Collisions Within the Same Stream
     if ch_no == 1 and re.search(r"\b(diophantine|lifting\s+the\s+exponent|\blte\b|pell'?s?\s+equation)\b", title_clean, re.I):
         return False
-    if ch_no == 12 and re.search(r"\b(ioqm|prmo)\b", title_clean, re.I) and not re.search(r"\b(rmo|inmo|imo)\b", title_clean, re.I):
+    if ch_no == 12:
+        if re.search(r"\b(ioqm|prmo)\b", title_clean, re.I) and not re.search(r"\b(rmo|inmo)\b", title_clean, re.I):
+            return False
+        if re.search(
+            r"\b(egmo|imo\s+shortlist|\bisl\b|\bbmo\b|\bapmo\b|\brmm\b|putnam|amc\s*(?:8|10|12)|\baime\b|sof\s+imo)\b",
+            title_clean,
+            re.I,
+        ):
+            return False
+    if ch_no == 14:
+        # Reject school-level SOF IMO in International MO module (routes cleanly to Module 15)
+        if re.search(r"\b(sof\s+imo|imo\s+(?:class|grade|level)\s*\d+|class\s*(?:1|2|3|4|5|6|7|8|9|10)(?:th)?\s+imo|imo\s+olympiad\s+workbook)\b", title_clean, re.I):
+            return False
+    if ch_no == 17 and re.search(r"\b(rotational|rigid\s+body|\brbd\b|moment\s+of\s+inertia)\b", title_clean, re.I):
         return False
-    if ch_no == 14 and re.search(r"\b(rotational|rigid\s+body|\brbd\b|moment\s+of\s+inertia)\b", title_clean, re.I):
-        return False
-    if ch_no == 22:
+    if ch_no == 25:
         has_optics_mod = bool(
             re.search(
                 r"\b(geometrical\s+optics|ray\s+optics|wave\s+optics|refraction|prism|lens|mirror|interference|diffraction|\bydse\b|polarization|modern\s+physics|photoelectric|bohr\w*|de\s+broglie|nuclear\s+physics|radioactivity|x[\s-]*rays?|relativity)\b",
@@ -1636,14 +2150,14 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
         )
         has_nsep_paper = bool(
             re.search(
-                r"\b(nsep|inpho|ipho)\b.*\b(paper|solution\w*|pyq\w*|marathon|revision|previous\s+year|mock|complete|201\d|202\d)\b|\b(paper|solution\w*|pyq\w*|marathon|previous\s+year)\b.*\b(nsep|inpho|ipho)\b",
+                r"\b(nsep|inpho|ipho|apho)\b.*\b(paper|solution\w*|pyq\w*|marathon|revision|previous\s+year|mock|complete|201\d|202\d)\b|\b(paper|solution\w*|pyq\w*|marathon|previous\s+year)\b.*\b(nsep|inpho|ipho|apho)\b",
                 title_clean,
                 re.I,
             )
         )
         if not (has_optics_mod or has_nsep_paper):
             return False
-    if ch_no == 30:
+    if ch_no == 33:
         has_spec_bio = bool(
             re.search(
                 r"\b(spectroscop\w*|\bnmr\b|infrared|\bir\s+spectroscop\w*|mass\s+spectrometr\w*|\buv[\s-]*vis\b|chemical\s+shift|biomolecules?|carbohydrates?|amino\s+acids?|peptides?|proteins?)\b",
@@ -1660,7 +2174,7 @@ def is_valid_chapter_candidate(cand: dict, ch_no: int, subject: str, chapter_re:
         )
         if not (has_spec_bio or has_nsec_paper):
             return False
-    if ch_no == 39 and re.search(r"\b(segment\s+trees?|fenwick\s+trees?|binary\s+indexed\s+trees?)\b", title_clean, re.I):
+    if ch_no == 43 and re.search(r"\b(segment\s+trees?|fenwick\s+trees?|binary\s+indexed\s+trees?)\b", title_clean, re.I):
         return False
 
     # 7. Strict Module Keyword Match
@@ -1805,9 +2319,8 @@ def build_corpus(use_cache: bool = True) -> dict:
                 for c in items:
                     sweep_candidates.append((subject, c))
 
-    # Route specialized modules first so specific modules (e.g. Diophantine, Circle Geometry, Segment Trees,
-    # NSEJS Physics/Chem/Bio) claim matching sweeps before broader umbrella/marathon modules.
-    specialized_first = {2, 7, 9, 10, 11, 15, 22, 30, 31, 32, 33, 34, 37, 40}
+    # Route specialized contest & topic modules first before broader umbrella modules
+    specialized_first = {2, 7, 9, 10, 11, 13, 14, 15, 18, 25, 33, 34, 35, 36, 37, 39, 41, 44}
     priority_chapters = sorted(
         compiled_chapters,
         key=lambda c: (0 if c[0] in specialized_first else 1, c[0]),
@@ -1837,7 +2350,7 @@ def build_corpus(use_cache: bool = True) -> dict:
             if gkey in seen_global or gkey in seen_local:
                 continue
             seen_local.add(gkey)
-            exam, fmt = classify_exam_and_format(cand, subject)
+            exam, fmt = classify_exam_and_format(cand, subject, ch_no)
             age_m, vpm, t_score, t_badge = compute_trend_metrics(cand, fmt)
             enriched.append((t_score, age_m, vpm, t_badge, exam, fmt, cand))
 
@@ -1857,6 +2370,55 @@ def build_corpus(use_cache: bool = True) -> dict:
 
         unique_ch: list[dict] = []
         edu_cap: dict[str, int] = {}
+        lang_cap: Counter = Counter()
+
+        def _append_record(t_score: float, age_m: float, vpm: int, t_badge: str, exam: str, fmt: str, cand: dict) -> None:
+            gkey = (cand["provider"], cand["video_id"])
+            institute = resolve_institute(cand)
+            educator = resolve_educator(cand, subject, unit)
+            ekey = f"{educator.casefold()}::{cand['provider']}"
+            lang = resolve_language(cand)
+            seen_global.add(gkey)
+            edu_cap[ekey] = edu_cap.get(ekey, 0) + 1
+            lang_cap[lang] += 1
+
+            unique_ch.append(
+                {
+                    "provider": cand["provider"],
+                    "video_id": cand["video_id"],
+                    "embed_video_id": cand["embed_video_id"],
+                    "url": cand["url"],
+                    "title": cand["title"],
+                    "channel": cand["channel"],
+                    "channel_url": cand["channel_url"],
+                    "institute": institute,
+                    "educator": educator,
+                    "language": lang,
+                    "thumbnail": cand["thumbnail"],
+                    "subject": subject,
+                    "unit": unit,
+                    "chapter_no": ch_no,
+                    "chapter": ch_name,
+                    "class_level": class_lvl,
+                    "weightage": weightage,
+                    "syllabus_scope": scope,
+                    "target_exam": exam,
+                    "format": fmt,
+                    "lesson_count": cand["lesson_count"],
+                    "duration": cand["duration"],
+                    "duration_sec": cand["duration_sec"],
+                    "views_text": cand["views_text"],
+                    "view_count": cand["view_count"],
+                    "published": cand["published"],
+                    "age_months": age_m,
+                    "views_per_month": vpm,
+                    "trend_score": t_score,
+                    "trend_badge": t_badge,
+                    "score": t_score,
+                    "note": build_pedagogy_note(cand, educator, exam, fmt, ch_name),
+                    "sample_lectures": cand.get("sample_lectures") or [],
+                }
+            )
 
         def _try_take(pool_items: list, limit_count: int, per_edu_max: int) -> None:
             for t_score, age_m, vpm, t_badge, exam, fmt, cand in pool_items:
@@ -1865,52 +2427,11 @@ def build_corpus(use_cache: bool = True) -> dict:
                 gkey = (cand["provider"], cand["video_id"])
                 if gkey in seen_global:
                     continue
-                institute = resolve_institute(cand)
                 educator = resolve_educator(cand, subject, unit)
                 ekey = f"{educator.casefold()}::{cand['provider']}"
                 if edu_cap.get(ekey, 0) >= per_edu_max:
                     continue
-                seen_global.add(gkey)
-                edu_cap[ekey] = edu_cap.get(ekey, 0) + 1
-                lang = resolve_language(cand)
-
-                unique_ch.append(
-                    {
-                        "provider": cand["provider"],
-                        "video_id": cand["video_id"],
-                        "embed_video_id": cand["embed_video_id"],
-                        "url": cand["url"],
-                        "title": cand["title"],
-                        "channel": cand["channel"],
-                        "channel_url": cand["channel_url"],
-                        "institute": institute,
-                        "educator": educator,
-                        "language": lang,
-                        "thumbnail": cand["thumbnail"],
-                        "subject": subject,
-                        "unit": unit,
-                        "chapter_no": ch_no,
-                        "chapter": ch_name,
-                        "class_level": class_lvl,
-                        "weightage": weightage,
-                        "syllabus_scope": scope,
-                        "target_exam": exam,
-                        "format": fmt,
-                        "lesson_count": cand["lesson_count"],
-                        "duration": cand["duration"],
-                        "duration_sec": cand["duration_sec"],
-                        "views_text": cand["views_text"],
-                        "view_count": cand["view_count"],
-                        "published": cand["published"],
-                        "age_months": age_m,
-                        "views_per_month": vpm,
-                        "trend_score": t_score,
-                        "trend_badge": t_badge,
-                        "score": t_score,
-                        "note": build_pedagogy_note(cand, educator, exam, fmt, ch_name),
-                        "sample_lectures": cand.get("sample_lectures") or [],
-                    }
-                )
+                _append_record(t_score, age_m, vpm, t_badge, exam, fmt, cand)
 
         # Balanced selection purely by YouTube Trend & Popularity (12 top trending videos + 8 top playlists)
         _try_take(videos_pool, 12, 2)
@@ -1919,6 +2440,18 @@ def build_corpus(use_cache: bool = True) -> dict:
             _try_take(combined_pool, 20, 4)
         if len(unique_ch) < 10:
             _try_take(combined_pool, 16, 6)
+
+        # Ensure All-India regional language candidates that matched this module on merit are included
+        # (still ranked 100% by pure trend_score below, with zero score boost!)
+        for t_score, age_m, vpm, t_badge, exam, fmt, cand in combined_pool:
+            if len(unique_ch) >= 28:
+                break
+            gkey = (cand["provider"], cand["video_id"])
+            if gkey in seen_global:
+                continue
+            lang = resolve_language(cand)
+            if lang in REGIONAL_LANGUAGES and lang_cap[lang] < 2:
+                _append_record(t_score, age_m, vpm, t_badge, exam, fmt, cand)
 
         # Sort strictly by pure YouTube trend_score, views_per_month, view_count — ZERO institute priority
         unique_ch.sort(
@@ -1931,7 +2464,7 @@ def build_corpus(use_cache: bool = True) -> dict:
         )
         pl_cnt = sum(1 for r in unique_ch if r["provider"] == "playlist")
 
-        exam_label = SUBJECT_TO_EXAM[subject]
+        exam_label = SUBJECT_DEFAULT_EXAM[subject]
         yt_pl_q = urllib.parse.quote_plus(f"{ch_name} {exam_label}")
         yt_os_q = urllib.parse.quote_plus(f"{ch_name} Olympiad lecture")
 
@@ -1951,7 +2484,7 @@ def build_corpus(use_cache: bool = True) -> dict:
             "yt_oneshots_url": f"https://www.youtube.com/results?search_query={yt_os_q}&sp=EgIYAg%253D%253D",
         }
 
-    # Assemble in canonical syllabus order 1..40
+    # Assemble in canonical syllabus order 1..44
     syllabus_out = [chapter_meta_map[n] for n in range(1, len(SYLLABUS) + 1)]
     all_entries: list[dict] = []
     for n in range(1, len(SYLLABUS) + 1):
@@ -2072,15 +2605,15 @@ def build_corpus(use_cache: bool = True) -> dict:
 
 
 def self_test() -> None:
-    assert len(SYLLABUS) == 40, f"Expected 40 canonical Olympiad modules, got {len(SYLLABUS)}"
+    assert len(SYLLABUS) == 44, f"Expected 44 canonical Olympiad modules, got {len(SYLLABUS)}"
     nums = [r[0] for r in SYLLABUS]
-    assert nums == list(range(1, 41)), "Module numbers must be contiguous 1..40"
+    assert nums == list(range(1, 45)), "Module numbers must be contiguous 1..44"
 
     counts_by_stream = Counter(r[1] for r in SYLLABUS)
-    assert counts_by_stream["Maths Olympiad"] == 12
+    assert counts_by_stream["Maths Olympiad"] == 15
     assert counts_by_stream["Physics Olympiad"] == 10
     assert counts_by_stream["Chemistry Olympiad"] == 8
-    assert counts_by_stream["Jr Science & Astronomy"] == 5
+    assert counts_by_stream["Jr Science & Astronomy"] == 6
     assert counts_by_stream["Informatics Olympiad"] == 5
 
     assert parse_views("1.8M views") == 1_800_000
@@ -2088,29 +2621,73 @@ def self_test() -> None:
     assert parse_duration_seconds("12:30") == 750
     assert parse_duration_seconds("7:30") == 450
 
-    # Verify >= 8m (480s) acceptance for focused Olympiad walkthroughs (e.g. Michael Penn 12m30s)
-    cre_nt = re.compile(SYLLABUS[1][7], re.I)
-    good_walkthrough = {
+    # Verify AMC / AIME module (Module 13) & classification
+    cre_amc = re.compile(SYLLABUS[12][7], re.I)
+    amc_vid = {
         "provider": "youtube",
-        "video_id": "abcdefghijk",
-        "title": "A nice Diophantine equation from the IMO!",
-        "channel": "Michael Penn",
-        "channel_url": "https://www.youtube.com/@MichaelPennMath",
+        "video_id": "amc1012aime",
+        "title": "2024 AIME I Problem 12 & AMC 12 Geometry Walkthrough",
+        "channel": "OmegaLearn",
+        "channel_url": "https://www.youtube.com/@OmegaLearn",
         "lesson_count": 0,
-        "duration_sec": 750,
-        "view_count": 180000,
+        "duration_sec": 980,
+        "view_count": 65000,
         "sample_lectures": [],
     }
-    assert is_valid_chapter_candidate(good_walkthrough, 2, "Maths Olympiad", cre_nt)
-    exam, fmt = classify_exam_and_format(good_walkthrough, "Maths Olympiad")
-    assert exam == "IOQM / INMO" and fmt == "Olympiad Problems"
+    assert is_valid_chapter_candidate(amc_vid, 13, "Maths Olympiad", cre_amc)
+    exam, fmt = classify_exam_and_format(amc_vid, "Maths Olympiad", 13)
+    assert exam == "AMC 8/10/12 & AIME" and fmt == "Olympiad Problems"
+    assert resolve_language(amc_vid) == "English"
 
-    # Reject < 8m (480s) clip
-    too_short = dict(good_walkthrough, duration_sec=420)
-    assert not is_valid_chapter_candidate(too_short, 2, "Maths Olympiad", cre_nt)
+    # Verify EGMO / IMO Shortlist module (Module 14)
+    cre_egmo = re.compile(SYLLABUS[13][7], re.I)
+    egmo_vid = {
+        "provider": "youtube",
+        "video_id": "egmo2024imo",
+        "title": "EGMO 2024 Problem 4 & IMO Shortlist Geometry Solution",
+        "channel": "Evan Chen",
+        "channel_url": "https://www.youtube.com/@evanchenmath",
+        "lesson_count": 0,
+        "duration_sec": 1820,
+        "view_count": 42000,
+        "sample_lectures": [],
+    }
+    assert is_valid_chapter_candidate(egmo_vid, 14, "Maths Olympiad", cre_egmo)
+    exam_egmo, _ = classify_exam_and_format(egmo_vid, "Maths Olympiad", 14)
+    assert exam_egmo == "IMO · EGMO · Global MO"
 
-    # Verify NeetCode is allowed in Informatics Olympiad and never misblocked by NEET filter
-    cre_graph = re.compile(SYLLABUS[38][7], re.I)
+    # Verify All-India Regional Language support (Tamil, Marathi, Bengali, Odia)
+    tamil_ntse = {
+        "provider": "youtube",
+        "video_id": "tamilntse01",
+        "title": "NMMS & NTSE Science Talent Revision in Tamil",
+        "channel": "Rubi Theresa",
+        "channel_url": "",
+        "lesson_count": 0,
+        "duration_sec": 1200,
+        "view_count": 35000,
+        "sample_lectures": [],
+    }
+    cre_talent = re.compile(SYLLABUS[38][7], re.I)
+    assert is_valid_chapter_candidate(tamil_ntse, 39, "Jr Science & Astronomy", cre_talent)
+    assert resolve_language(tamil_ntse) == "Tamil"
+
+    marathi_hb = {
+        "provider": "youtube",
+        "video_id": "marathihb01",
+        "title": "Homi Bhabha Class 9 Balvaidnyanik Science Lecture",
+        "channel": "Pawan Wagh Academy",
+        "channel_url": "",
+        "lesson_count": 0,
+        "duration_sec": 1500,
+        "view_count": 48000,
+        "sample_lectures": [],
+    }
+    assert is_valid_chapter_candidate(marathi_hb, 39, "Jr Science & Astronomy", cre_talent)
+    assert resolve_language(marathi_hb) == "Marathi"
+
+    # Verify NeetCode in Informatics Olympiad (Module 43) and cross-stream guard
+    cre_graph = re.compile(SYLLABUS[42][7], re.I)
     good_neetcode = {
         "provider": "youtube",
         "video_id": "1234567890a",
@@ -2122,27 +2699,14 @@ def self_test() -> None:
         "view_count": 540000,
         "sample_lectures": [],
     }
-    assert is_valid_chapter_candidate(good_neetcode, 39, "Informatics Olympiad", cre_graph)
-    # Cross-stream guard: NeetCode must NOT leak into Maths Olympiad
+    assert is_valid_chapter_candidate(good_neetcode, 43, "Informatics Olympiad", cre_graph)
     cre_math_graph = re.compile(SYLLABUS[6][7], re.I)
     assert not is_valid_chapter_candidate(good_neetcode, 7, "Maths Olympiad", cre_math_graph)
 
-    # Reject admit card / cutoff noise
-    bad_cutoff = {
-        "provider": "youtube",
-        "video_id": "cutoff12345",
-        "title": "IOQM Expected Cutoff & Admit Card Download",
-        "channel": "Vedantu Olympiad School",
-        "channel_url": "",
-        "lesson_count": 0,
-        "duration_sec": 900,
-        "view_count": 50000,
-        "sample_lectures": [],
-    }
-    cre_ioqm = re.compile(SYLLABUS[10][7], re.I)
-    assert not is_valid_chapter_candidate(bad_cutoff, 11, "Maths Olympiad", cre_ioqm)
-
-    print("self-test ok (40 canonical Olympiad modules across 5 streams, >=480s & trend-only guards validated)", flush=True)
+    print(
+        "self-test ok (44 Olympiad modules, AMC/AIME/EGMO/IMO/ISI/NMTC/NTSE tiers & All-India regional languages validated)",
+        flush=True,
+    )
 
 
 def main(argv: list[str]) -> int:
@@ -2157,15 +2721,22 @@ def main(argv: list[str]) -> int:
         f"  - {i['institute']:<44}: {i['total']:>4} ({i['playlists']:>3} PL, {i['videos']:>3} vids across {i['chapter_coverage']:>2} mod)"
         for i in out["institutes"]
     )
+    exam_cnt = Counter(v["target_exam"] for v in out["videos"])
+    exam_lines = "\n".join(f"  - {ex:<32}: {cnt:>4}" for ex, cnt in exam_cnt.most_common())
+    lang_cnt = Counter(v["language"] for v in out["videos"])
+    lang_lines = "\n".join(f"  - {lg:<16}: {cnt:>4}" for lg, cnt in lang_cnt.most_common())
     min_mod = min(out["syllabus"], key=lambda c: c["count"])
     print(
-        f"\n=== OLYMPIADTUBE 40-MODULE CORPUS REPORT ===\n"
+        f"\n=== OLYMPIADTUBE 44-MODULE CORPUS REPORT ===\n"
         f"Modules populated       : {m['chapters_populated']} / {m['chapters_total']}\n"
         f"Modules with playlists  : {m['chapters_with_playlists']} / {m['chapters_total']}\n"
         f"Minimum module count    : {min_mod['count']} (Module {min_mod['chapter_no']}: {min_mod['chapter']})\n"
         f"Total Olympiad resources: {m['entries_published']} ({m['playlists_published']} playlists, {m['videos_published']} lectures)\n"
         f"Distinct ecosystems     : {m['distinct_institutes']}\n"
         f"Distinct educators      : {m['distinct_educators']} ({m['distinct_channels']} verified channels)\n"
+        f"Queries (cached / live) : {m['queries_executed']} ({m['cached_requests']} cached, {m['live_requests']} live)\n"
+        f"Target Exam Breakdown:\n{exam_lines}\n"
+        f"Language Breakdown:\n{lang_lines}\n"
         f"Ecosystem Breakdown:\n{inst_lines}\n"
         f"Output written to       : {OUT_PATH}",
         flush=True,

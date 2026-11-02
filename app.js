@@ -33,6 +33,105 @@
     Low: 1,
   };
 
+  const LANGUAGE_META = {
+    Hinglish: {
+      badge: "Hinglish",
+      option: "Hinglish (Hindi + Eng)",
+      aliases: "hinglish hindi english mix",
+      regional: false,
+    },
+    English: {
+      badge: "English",
+      option: "English Medium",
+      aliases: "english medium pure english",
+      regional: false,
+    },
+    Hindi: {
+      badge: "हिंदी · Hindi",
+      option: "हिंदी · Hindi Medium",
+      aliases: "hindi medium हिंदी माध्यम हिन्दी bseb upmsp rbse mp board",
+      regional: true,
+    },
+    "Hindi / Hinglish": {
+      badge: "हिंदी · Hinglish",
+      option: "हिंदी · Hindi / Hinglish",
+      aliases: "hindi hinglish हिंदी माध्यम हिन्दी",
+      regional: false,
+    },
+    Telugu: {
+      badge: "తెలుగు · Telugu",
+      option: "తెలుగు · Telugu",
+      aliases: "telugu తెలుగు ap ts eapcet eamcet ipe andhra telangana",
+      regional: true,
+    },
+    Tamil: {
+      badge: "தமிழ் · Tamil",
+      option: "தமிழ் · Tamil",
+      aliases: "tamil தமிழ் tn state board tamilnadu",
+      regional: true,
+    },
+    Malayalam: {
+      badge: "മലയാളം · Malayalam",
+      option: "മലയാളം · Malayalam",
+      aliases: "malayalam മലയാളം kerala keam plus two sslc",
+      regional: true,
+    },
+    Kannada: {
+      badge: "ಕನ್ನಡ · Kannada",
+      option: "ಕನ್ನಡ · Kannada",
+      aliases: "kannada ಕನ್ನಡ karnataka kcet puc",
+      regional: true,
+    },
+    Marathi: {
+      badge: "मराठी · Marathi",
+      option: "मराठी · Marathi",
+      aliases: "marathi मराठी maharashtra mht cet mhtcet hsc ssc",
+      regional: true,
+    },
+    Bengali: {
+      badge: "বাংলা · Bengali",
+      option: "বাংলা · Bengali",
+      aliases: "bengali bangla বাংলা wbjee wbchse madhyamik west bengal",
+      regional: true,
+    },
+    Gujarati: {
+      badge: "ગુજરાતી · Gujarati",
+      option: "ગુજરાતી · Gujarati",
+      aliases: "gujarati ગુજરાતી gujcet gseb gujarat",
+      regional: true,
+    },
+    Odia: {
+      badge: "ଓଡ଼ିଆ · Odia",
+      option: "ଓଡ଼ିଆ · Odia",
+      aliases: "odia oriya ଓଡ଼ିଆ ojee chse odisha",
+      regional: true,
+    },
+    Punjabi: {
+      badge: "ਪੰਜਾਬੀ · Punjabi",
+      option: "ਪੰਜਾਬੀ · Punjabi",
+      aliases: "punjabi ਪੰਜਾਬੀ pseb punjab",
+      regional: true,
+    },
+    Assamese: {
+      badge: "অসমীয়া · Assamese",
+      option: "অসমীয়া · Assamese",
+      aliases: "assamese অসমীয়া ahsec seba assam",
+      regional: true,
+    },
+  };
+
+  function getLangMeta(lang) {
+    const key = String(lang || "").trim();
+    return (
+      LANGUAGE_META[key] || {
+        badge: key || "Hinglish",
+        option: key || "Hinglish",
+        aliases: key.toLowerCase(),
+        regional: false,
+      }
+    );
+  }
+
   const state = {
     meta: null,
     syllabus: [],
@@ -56,6 +155,7 @@
     flatLimit: FLAT_PAGE_SIZE,
     saved: loadSet(SAVED_KEY),
     doneChapters: loadSet(DONE_KEY),
+    rescueLang: "all",
     rescueSubject: "All",
     rescueChapter: 0,
     rescueSituation: "backlog",
@@ -81,6 +181,8 @@
     subline: document.getElementById("subline"),
     subjectTabs: document.getElementById("subject-tabs"),
     intentBtns: Array.from(document.querySelectorAll(".intent-btn")),
+    ribbonLangSelect: document.getElementById("ribbon-lang-select"),
+    ribbonExamSelect: document.getElementById("ribbon-exam-select"),
     openRefineBtn: document.getElementById("open-refine-btn"),
     refineBadge: document.getElementById("refine-badge"),
     clearChapterBtn: document.getElementById("clear-chapter-btn"),
@@ -96,6 +198,7 @@
     spotlight: document.getElementById("trending-spotlight"),
     list: document.getElementById("list"),
     rescueDialog: document.getElementById("rescue-dialog"),
+    rescueLang: document.getElementById("rescue-lang"),
     rescueSubject: document.getElementById("rescue-subject"),
     rescueChapter: document.getElementById("rescue-chapter"),
     situationCards: Array.from(document.querySelectorAll(".situation-card")),
@@ -228,14 +331,23 @@
       const parts = [];
       if (v.lesson_count) parts.push(`${v.lesson_count} lectures`);
       parts.push("Complete playlist");
-      if (v.language) parts.push(v.language);
+      if (v.target_exam) parts.push(v.target_exam);
       return parts.join(" · ");
     }
     const parts = [];
     if (v.view_count > 0) parts.push(`${compactNum(v.view_count)} views`);
     const age = formatAge(v);
     if (age) parts.push(age);
-    if (!parts.length && v.format) parts.push(v.format);
+    if (
+      v.target_exam &&
+      /cet|bitsat|board|aiims|nursing|cbse|isc|hsc|puc|ipe|sslc|wbchse|gseb/i.test(
+        v.target_exam
+      )
+    ) {
+      parts.push(v.target_exam);
+    } else if (!parts.length && v.format) {
+      parts.push(v.format);
+    }
     return parts.join(" · ");
   }
 
@@ -312,8 +424,12 @@
           state.chapterNo = prob.chapterNo || 0;
           state.query = prob.query || "";
           state.mode = prob.mode || "trending";
+          state.lang = prob.lang || "all";
+          state.exam = prob.exam || "all";
           if (el.q) el.q.value = state.query;
+          syncLangAndExamSelects();
           syncSearchClear();
+          populateSelectOptions();
           renderAll({ announce: true });
         });
         el.quickProblems.appendChild(btn);
@@ -382,6 +498,19 @@
 
   function indexRecord(v) {
     const chExtra = CFG.acronyms[v.chapter_no] || "";
+    const langMeta = getLangMeta(v.language);
+    let examExtra = "";
+    const tx = String(v.target_exam || "").toLowerCase();
+    if (tx.includes("cet") || tx.includes("bitsat")) {
+      examExtra +=
+        " engineering cet mht cet mhtcet kcet eapcet eamcet wbjee keam gujcet ojee comedk bitsat";
+    }
+    if (tx.includes("board") || tx.includes("class 12") || tx.includes("class 10")) {
+      examExtra += " board boards cbse isc ncert state board hsc puc ipe";
+    }
+    if (tx.includes("aiims") || tx.includes("medical") || tx.includes("nursing")) {
+      examExtra += " medical aiims jipmer bsc nursing paramedical";
+    }
     v._key = itemKey(v);
     const views = Number(v.view_count) || 0;
     const ageM = Math.max(Number(v.age_months) || 12, 0.5);
@@ -404,8 +533,11 @@
       v.channel,
       v.format,
       v.language,
+      langMeta.badge,
+      langMeta.aliases,
       v.class_level,
       v.target_exam,
+      examExtra,
       chExtra,
     ]
       .filter(Boolean)
@@ -540,17 +672,34 @@
       }
     }
 
-    // Dynamic Target Exam Tiers
+    // Dynamic Target Exam Tiers (sorted by video count descending)
+    const examCounts = new Map();
+    for (const v of state.videos) {
+      if (v.target_exam) {
+        examCounts.set(v.target_exam, (examCounts.get(v.target_exam) || 0) + 1);
+      }
+    }
+    const sortedExams = Array.from(examCounts.entries()).sort(
+      (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+    );
+
     if (el.examSelect && el.examSelect.options.length <= 1) {
-      const exams = Array.from(
-        new Set(state.videos.map((v) => v.target_exam).filter(Boolean))
-      ).sort();
-      for (const ex of exams) {
+      for (const [ex, cnt] of sortedExams) {
         const opt = document.createElement("option");
         opt.value = ex;
-        opt.textContent = ex;
+        opt.textContent = `${ex} (${cnt})`;
         el.examSelect.appendChild(opt);
       }
+    }
+
+    if (el.ribbonExamSelect && el.ribbonExamSelect.options.length <= 1) {
+      for (const [ex, cnt] of sortedExams) {
+        const opt = document.createElement("option");
+        opt.value = ex;
+        opt.textContent = `🎓 ${ex} (${cnt})`;
+        el.ribbonExamSelect.appendChild(opt);
+      }
+      el.ribbonExamSelect.hidden = sortedExams.length <= 1;
     }
 
     // Dynamic Class Levels
@@ -566,17 +715,62 @@
       }
     }
 
-    // Dynamic Languages
+    // Dynamic Languages (sorted by video count descending, with native script labels)
+    const langCounts = new Map();
+    for (const v of state.videos) {
+      if (v.language) {
+        langCounts.set(v.language, (langCounts.get(v.language) || 0) + 1);
+      }
+    }
+    const sortedLangs = Array.from(langCounts.entries()).sort(
+      (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+    );
+
     if (el.langSelect && el.langSelect.options.length <= 1) {
-      const langs = Array.from(
-        new Set(state.videos.map((v) => v.language).filter(Boolean))
-      ).sort();
-      for (const lg of langs) {
+      for (const [lg, cnt] of sortedLangs) {
+        const meta = getLangMeta(lg);
         const opt = document.createElement("option");
         opt.value = lg;
-        opt.textContent = lg;
+        opt.textContent = `${meta.option} (${cnt})`;
         el.langSelect.appendChild(opt);
       }
+    }
+
+    if (el.ribbonLangSelect && el.ribbonLangSelect.options.length <= 1) {
+      if (el.ribbonLangSelect.options[0]) {
+        el.ribbonLangSelect.options[0].textContent = `🌐 All Languages (${sortedLangs.length})`;
+      }
+      for (const [lg, cnt] of sortedLangs) {
+        const meta = getLangMeta(lg);
+        const opt = document.createElement("option");
+        opt.value = lg;
+        opt.textContent = `🌐 ${meta.badge} (${cnt})`;
+        el.ribbonLangSelect.appendChild(opt);
+      }
+      el.ribbonLangSelect.hidden = sortedLangs.length <= 1;
+    }
+
+    syncLangAndExamSelects();
+  }
+
+  function syncLangAndExamSelects() {
+    if (el.langSelect && el.langSelect.value !== state.lang) {
+      el.langSelect.value = state.lang;
+    }
+    if (el.ribbonLangSelect) {
+      if (el.ribbonLangSelect.value !== state.lang) {
+        el.ribbonLangSelect.value = state.lang;
+      }
+      el.ribbonLangSelect.classList.toggle("is-filtered", state.lang !== "all");
+    }
+    if (el.examSelect && el.examSelect.value !== state.exam) {
+      el.examSelect.value = state.exam;
+    }
+    if (el.ribbonExamSelect) {
+      if (el.ribbonExamSelect.value !== state.exam) {
+        el.ribbonExamSelect.value = state.exam;
+      }
+      el.ribbonExamSelect.classList.toggle("is-filtered", state.exam !== "all");
     }
   }
 
@@ -881,10 +1075,10 @@
     }
     if (state.exam !== "all") {
       chips.push({
-        label: state.exam,
+        label: `🎓 ${state.exam}`,
         clear: () => {
           state.exam = "all";
-          if (el.examSelect) el.examSelect.value = "all";
+          syncLangAndExamSelects();
         },
       });
     }
@@ -898,11 +1092,12 @@
       });
     }
     if (state.lang !== "all") {
+      const lm = getLangMeta(state.lang);
       chips.push({
-        label: state.lang,
+        label: `🌐 ${lm.badge}`,
         clear: () => {
           state.lang = "all";
-          if (el.langSelect) el.langSelect.value = "all";
+          syncLangAndExamSelects();
         },
       });
     }
@@ -1328,6 +1523,24 @@
 
     creatorRow.append(av, cBtn);
 
+    if (v.language) {
+      const lMeta = getLangMeta(v.language);
+      const lBtn = document.createElement("button");
+      lBtn.type = "button";
+      lBtn.className = `lang-badge${lMeta.regional ? " is-regional" : ""}`;
+      lBtn.textContent = lMeta.badge;
+      lBtn.setAttribute(
+        "aria-label",
+        `Filter by ${v.language} language medium (${shortRef(v)})`
+      );
+      lBtn.addEventListener("click", () => {
+        state.lang = state.lang === v.language ? "all" : v.language;
+        syncLangAndExamSelects();
+        renderAll({ announce: true });
+      });
+      creatorRow.appendChild(lBtn);
+    }
+
     const metricsRow = document.createElement("div");
     metricsRow.className = "card-metrics-row";
 
@@ -1572,6 +1785,7 @@
     const chaptersRepresented = new Set(filtered.map((v) => v.chapter_no)).size;
 
     renderSubjectTabs();
+    syncLangAndExamSelects();
     updateChromeAndCounters();
     renderActiveFilterPills();
     renderSyllabusTrees(filtered);
@@ -1600,10 +1814,9 @@
     if (el.q) el.q.value = "";
     if (el.sortSelect) el.sortSelect.value = "trending";
     if (el.educatorSelect) el.educatorSelect.value = "";
-    if (el.examSelect) el.examSelect.value = "all";
     if (el.classSelect) el.classSelect.value = "all";
-    if (el.langSelect) el.langSelect.value = "all";
     if (el.typeSelect) el.typeSelect.value = "all";
+    syncLangAndExamSelects();
     syncSearchClear();
     populateSelectOptions();
     renderAll({ announce: true });
@@ -1704,6 +1917,35 @@
   function initRescueWizard() {
     if (!el.rescueDialog) return;
 
+    const populateRescueLanguages = () => {
+      if (!el.rescueLang) return;
+      el.rescueLang.replaceChildren();
+      const anyOpt = document.createElement("option");
+      anyOpt.value = "all";
+      anyOpt.textContent = "🌐 Any Language (Top Trending)";
+      el.rescueLang.appendChild(anyOpt);
+
+      const langCounts = new Map();
+      for (const v of state.videos) {
+        if (v.language) {
+          langCounts.set(v.language, (langCounts.get(v.language) || 0) + 1);
+        }
+      }
+      const sorted = Array.from(langCounts.entries()).sort(
+        (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+      );
+      for (const [lg, cnt] of sorted) {
+        const meta = getLangMeta(lg);
+        const opt = document.createElement("option");
+        opt.value = lg;
+        opt.textContent = `${meta.option} (${cnt})`;
+        el.rescueLang.appendChild(opt);
+      }
+      el.rescueLang.value =
+        state.lang !== "all" && langCounts.has(state.lang) ? state.lang : "all";
+      state.rescueLang = el.rescueLang.value;
+    };
+
     const populateRescueSubjects = () => {
       if (!el.rescueSubject) return;
       el.rescueSubject.replaceChildren();
@@ -1752,6 +1994,9 @@
     const renderPrescriptions = () => {
       if (!el.rescueResults) return;
       const basePool = state.videos.filter((v) => {
+        if (state.rescueLang !== "all" && v.language !== state.rescueLang) {
+          return false;
+        }
         if (state.rescueSubject !== "All" && v.subject !== state.rescueSubject) {
           return false;
         }
@@ -1794,7 +2039,10 @@
       if (!top3.length) {
         const p = document.createElement("p");
         p.className = "result-count";
-        p.textContent = "Select a subject or chapter to see prescriptions.";
+        p.textContent =
+          state.rescueLang !== "all"
+            ? `No videos found in ${state.rescueLang} for this specific chapter yet — switch Language Medium to Any Language to view top prescriptions.`
+            : "Select a subject or chapter to see prescriptions.";
         el.rescueResults.appendChild(p);
         return;
       }
@@ -1812,7 +2060,8 @@
 
         const p = document.createElement("p");
         const pill = getTractionPill(v);
-        p.textContent = `${pill.text} · ${v.educator || v.channel} · Ch ${pad2(v.chapter_no)} ${v.chapter}`;
+        const lBadge = v.language ? getLangMeta(v.language).badge : "";
+        p.textContent = `${pill.text}${lBadge ? ` · ${lBadge}` : ""} · ${v.educator || v.channel} · Ch ${pad2(v.chapter_no)} ${v.chapter}`;
 
         info.append(h4, p);
 
@@ -1835,10 +2084,16 @@
     };
 
     el.openRescueBtn?.addEventListener("click", () => {
+      populateRescueLanguages();
       populateRescueSubjects();
       populateRescueChapters();
       renderPrescriptions();
       el.rescueDialog.showModal();
+    });
+
+    el.rescueLang?.addEventListener("change", () => {
+      state.rescueLang = el.rescueLang.value || "all";
+      renderPrescriptions();
     });
 
     el.rescueSubject?.addEventListener("change", () => {
@@ -1864,6 +2119,7 @@
     });
 
     el.rescueApplyMain?.addEventListener("click", () => {
+      state.lang = state.rescueLang || "all";
       state.subject = state.rescueSubject;
       state.chapterNo = state.rescueChapter;
       if (state.rescueSituation === "zero") state.mode = "playlists";
@@ -1874,6 +2130,7 @@
         state.sort = "duration_asc";
         if (el.sortSelect) el.sortSelect.value = "duration_asc";
       }
+      syncLangAndExamSelects();
       populateSelectOptions();
       el.rescueDialog.close();
       renderAll({ announce: true });
@@ -1907,6 +2164,7 @@
     });
 
     document.addEventListener("keydown", (e) => {
+      if (e.isComposing || e.keyCode === 229) return;
       if (
         e.key === "/" &&
         !e.metaKey &&
@@ -1973,6 +2231,13 @@
 
     el.examSelect?.addEventListener("change", () => {
       state.exam = el.examSelect.value;
+      syncLangAndExamSelects();
+      renderAll({ announce: true });
+    });
+
+    el.ribbonExamSelect?.addEventListener("change", () => {
+      state.exam = el.ribbonExamSelect.value;
+      syncLangAndExamSelects();
       renderAll({ announce: true });
     });
 
@@ -1983,6 +2248,13 @@
 
     el.langSelect?.addEventListener("change", () => {
       state.lang = el.langSelect.value;
+      syncLangAndExamSelects();
+      renderAll({ announce: true });
+    });
+
+    el.ribbonLangSelect?.addEventListener("change", () => {
+      state.lang = el.ribbonLangSelect.value;
+      syncLangAndExamSelects();
       renderAll({ announce: true });
     });
 

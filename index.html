@@ -10,8 +10,8 @@
         localStorage.getItem("color-scheme") ?? "light dark";
     } catch {}
   </script>
-  <title>OlympiadTube — Trending IOQM, RMO, INMO, NSEP, NSEC & INOI Video Masterclasses</title>
-  <meta name="description" content="Zero-noise 40-module Science, Maths & Informatics Olympiad video studio (IOQM, INMO, NSEP, INPhO, NSEC, NSEJS, INOI) ranked purely by YouTube learner traction.">
+  <title>OlympiadTube — Trending IMO, IOQM, RMO, INMO, AIME, AMC, EGMO, ISI/CMI, NSEP & INOI Video Masterclasses</title>
+  <meta name="description" content="Zero-noise 44-module Olympiad video studio covering IMO, IOQM, RMO, INMO, EGMO, AMC 8/10/12, AIME, ISI/CMI, NMTC, NTSE, NSEP/INPhO, NSEC/INChO, NSEB/INBO, NSEA/IOAA, NSEJS/IJSO & ZCO/INOI across all Indian languages.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236d28d9'/%3E%3Ctext x='16' y='21.5' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='12' fill='%23ffffff'%3EOLY%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -25,18 +25,21 @@
         <span class="brand-glyph" id="brand-glyph" aria-hidden="true">♛</span>
         <span class="brand-text">
           <strong id="brand-name">OlympiadTube</strong>
-          <small id="brand-tagline">IOQM · RMO · INMO · NSEP · INOI</small>
+          <small id="brand-tagline">IMO · IOQM · AIME · AMC · EGMO · NSEP · INOI</small>
         </span>
       </a>
 
       <nav class="ecosystem-nav" aria-label="Student Tube learning platforms" id="ecosystem-nav">
-        <a class="eco-pill is-active" href="https://indrajeet877.github.io/jeetube/" aria-current="page">
+        <a class="eco-pill" href="https://indrajeet877.github.io/jeetube/">
           <span class="eco-dot is-jee" aria-hidden="true"></span>JEETube
         </a>
         <a class="eco-pill" href="https://indrajeet877.github.io/neettube/">
           <span class="eco-dot is-neet" aria-hidden="true"></span>NEETTube
         </a>
-        <a class="eco-pill" href="https://indrajeet877.github.io/olympiadtube/">
+        <a class="eco-pill" href="https://indrajeet877.github.io/boardtube/">
+          <span class="eco-dot is-board" aria-hidden="true"></span>BoardTube
+        </a>
+        <a class="eco-pill is-active" href="./" aria-current="page">
           <span class="eco-dot is-olympiad" aria-hidden="true"></span>OlympiadTube
         </a>
         <a class="eco-pill" href="https://indrajeet877.github.io/upboardtube/">
@@ -79,13 +82,13 @@
   <section class="hero-stage" aria-labelledby="hero-title">
     <div class="hero-inner">
       <div class="hero-eyebrow-row">
-        <span class="trend-live-pill" id="hero-badge">100% Pure YouTube Trend Ranking · Maths, Physics, Chem, Astro &amp; Informatics Olympiads</span>
-        <span class="hero-stat-summary" id="hero-stats">40 Chapters · Loading trending videos…</span>
+        <span class="trend-live-pill" id="hero-badge">100% Pure YouTube Trend Ranking · IMO · IOQM · RMO · INMO · AIME · AMC · EGMO · ISI/CMI · All-India</span>
+        <span class="hero-stat-summary" id="hero-stats">44 Chapters · Loading trending videos…</span>
       </div>
 
-      <h1 id="hero-title">Cracking an Olympiad problem? Learn from the #1 trending masterclass.</h1>
+      <h1 id="hero-title">Cracking IMO, IOQM, AIME, AMC, EGMO or Science Olympiads? Watch the #1 trending masterclass.</h1>
       <p class="hero-subtitle" id="hero-subtitle">
-        40 deep-proof and Olympiad problem-solving modules across IOQM/INMO, NSEP/INPhO, NSEC/INChO, NSEJS/NSEA, and ZCO/INOI — ranked strictly by organic YouTube learner traction.
+        Every Physics, Chemistry &amp; Maths chapter ranked purely by real YouTube student traction, monthly view velocity, and watch depth — built to solve your exact study problem in one click.
       </p>
 
       <search class="spotlight-search-wrap" aria-label="Search chapters, concepts, problems, or educators">
@@ -97,9 +100,12 @@
           </svg>
           <input
             id="q"
+            name="q"
             type="search"
-            placeholder="Search any chapter, concept, or teacher (e.g. Rotational torque, GOC, Definite Integration)…"
+            placeholder="Search any chapter, language, exam, or teacher (e.g. Rotational torque, Tamil, Telugu, MHT-CET, Om Sharma)…"
             enterkeyhint="search"
+            autocorrect="off"
+            autocapitalize="off"
             spellcheck="false"
           >
           <kbd id="key-hint" class="key-hint" aria-hidden="true">/</kbd>
@@ -141,6 +147,18 @@
           </button>
         </div>
 
+        <div class="ribbon-select-group" role="group" aria-label="Language medium and exam stream">
+          <label class="visually-hidden" for="ribbon-lang-select">Teaching language medium</label>
+          <select id="ribbon-lang-select" name="ribbon_lang" class="ribbon-select">
+            <option value="all">🌐 All Languages</option>
+          </select>
+
+          <label class="visually-hidden" for="ribbon-exam-select">Exam or board stream</label>
+          <select id="ribbon-exam-select" name="ribbon_exam" class="ribbon-select">
+            <option value="all">🎓 All Streams</option>
+          </select>
+        </div>
+
         <button type="button" id="open-refine-btn" class="refine-btn">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true">
             <path d="M4 6h16M7 12h10M10 18h4"/>
@@ -163,13 +181,13 @@
         <div class="rail-progress-wrap">
           <label class="rail-progress-label" for="syllabus-progress">
             <span>Mastered</span>
-            <strong id="stat-progress">0 / 40</strong>
+            <strong id="stat-progress">0 / 44</strong>
           </label>
-          <progress id="syllabus-progress" class="syllabus-progress" value="0" max="40"></progress>
+          <progress id="syllabus-progress" class="syllabus-progress" value="0" max="44"></progress>
         </div>
         <div class="rail-search-box">
           <label class="visually-hidden" for="ch-filter">Jump to chapter</label>
-          <input id="ch-filter" type="search" class="rail-input" placeholder="Jump to chapter…" spellcheck="false">
+          <input id="ch-filter" name="ch_filter" type="search" class="rail-input" placeholder="Jump to chapter…" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
       </div>
       <nav id="syllabus-tree" class="syllabus-tree" aria-label="Chapters by unit"></nav>
@@ -204,16 +222,17 @@
       <div class="footer-brand-col">
         <h2 class="footer-heading">Pure Student Traction · Zero Noise</h2>
         <p id="footer-copy">
-          Every lecture and full-chapter course is ranked strictly by organic YouTube view velocity, total student watch traction, and lesson completeness — never by paid placement or coaching priority. Switch seamlessly across <strong>JEETube</strong>, <strong>NEETTube</strong>, <strong>OlympiadTube</strong>, and <strong>UPBoardTube</strong> in the top bar.
+          Every lecture and full-chapter course across all major Indian languages is ranked strictly by organic YouTube view velocity, total student watch traction, and lesson completeness — never by paid placement or coaching priority. Switch seamlessly across <strong>JEETube</strong>, <strong>NEETTube</strong>, <strong>BoardTube</strong>, <strong>OlympiadTube</strong>, and <strong>UPBoardTube</strong> in the top bar.
         </p>
       </div>
       <div class="footer-links-col">
         <h2 class="footer-heading">Ecosystem &amp; Open Data</h2>
         <ul role="list" id="footer-eco-links">
           <li><a href="data/videos.json">Open Dataset JSON (<code>data/videos.json</code>)</a></li>
-          <li><a href="https://indrajeet877.github.io/jeetube/">JEETube (IIT-JEE Main &amp; Adv)</a></li>
-          <li><a href="https://indrajeet877.github.io/neettube/">NEETTube (NEET UG Medical)</a></li>
-          <li><a href="https://indrajeet877.github.io/olympiadtube/">OlympiadTube (IOQM · NSEP · INOI)</a></li>
+          <li><a href="https://indrajeet877.github.io/jeetube/">JEETube (IIT-JEE · State CETs · BITSAT)</a></li>
+          <li><a href="https://indrajeet877.github.io/neettube/">NEETTube (NEET UG · AIIMS · Medical)</a></li>
+          <li><a href="https://indrajeet877.github.io/boardtube/">BoardTube (CBSE · ISC · All State Boards)</a></li>
+          <li><a href="https://indrajeet877.github.io/olympiadtube/">OlympiadTube (IMO · IOQM · AIME · AMC · EGMO · NSEP · INOI)</a></li>
           <li><a href="https://indrajeet877.github.io/upboardtube/">UPBoardTube (UP Board 10 &amp; 12)</a></li>
         </ul>
       </div>
@@ -234,17 +253,23 @@
 
     <div class="rescue-grid">
       <div class="rescue-field">
-        <label for="rescue-subject">1. Pick Subject</label>
-        <select id="rescue-subject" class="studio-select"></select>
+        <label for="rescue-lang">1. Language Medium</label>
+        <select id="rescue-lang" name="rescue_lang" class="studio-select">
+          <option value="all">🌐 Any Language</option>
+        </select>
       </div>
       <div class="rescue-field">
-        <label for="rescue-chapter">2. Pick Chapter (or keep All)</label>
-        <select id="rescue-chapter" class="studio-select"></select>
+        <label for="rescue-subject">2. Pick Subject</label>
+        <select id="rescue-subject" name="rescue_subject" class="studio-select"></select>
+      </div>
+      <div class="rescue-field">
+        <label for="rescue-chapter">3. Pick Chapter (or All)</label>
+        <select id="rescue-chapter" name="rescue_chapter" class="studio-select"></select>
       </div>
     </div>
 
     <fieldset class="rescue-situations">
-      <legend>3. Choose your exact situation</legend>
+      <legend>4. Choose your exact situation</legend>
       <div class="situation-cards" id="situation-cards">
         <button type="button" class="situation-card" data-situation="zero" aria-pressed="false">
           <strong>🧱 Zero Basics</strong>
@@ -287,7 +312,7 @@
     <div class="refine-body">
       <div class="refine-field">
         <label for="sort-select">Ranking Order</label>
-        <select id="sort-select" class="studio-select">
+        <select id="sort-select" name="sort" class="studio-select">
           <option value="trending">🔥 YouTube Trending Velocity (Default)</option>
           <option value="views">⭐ Most Viewed on YouTube (All-Time)</option>
           <option value="chapterwise">📖 Syllabus Order (Ch 01 → End)</option>
@@ -300,29 +325,29 @@
 
       <div class="refine-field">
         <label for="unit-select">Unit / Branch</label>
-        <select id="unit-select" class="studio-select">
+        <select id="unit-select" name="unit" class="studio-select">
           <option value="">All Syllabus Units</option>
         </select>
       </div>
 
       <div class="refine-field">
         <label for="educator-select">Teacher / YouTube Channel</label>
-        <select id="educator-select" class="studio-select">
+        <select id="educator-select" name="educator" class="studio-select">
           <option value="">All Educators &amp; Channels</option>
         </select>
       </div>
 
       <div class="refine-two-col">
         <div class="refine-field">
-          <label for="exam-select">Target Tier</label>
-          <select id="exam-select" class="studio-select">
-            <option value="all">All Tiers</option>
+          <label for="exam-select">Target Stream / Exam</label>
+          <select id="exam-select" name="exam" class="studio-select">
+            <option value="all">All Streams</option>
           </select>
         </div>
 
         <div class="refine-field">
           <label for="class-select">Class / Stage</label>
-          <select id="class-select" class="studio-select">
+          <select id="class-select" name="class_level" class="studio-select">
             <option value="all">All Classes</option>
           </select>
         </div>
@@ -331,14 +356,14 @@
       <div class="refine-two-col">
         <div class="refine-field">
           <label for="lang-select">Teaching Medium</label>
-          <select id="lang-select" class="studio-select">
+          <select id="lang-select" name="lang" class="studio-select">
             <option value="all">All Languages</option>
           </select>
         </div>
 
         <div class="refine-field">
           <label for="type-select">YouTube Format</label>
-          <select id="type-select" class="studio-select">
+          <select id="type-select" name="type" class="studio-select">
             <option value="all">Videos + Playlists</option>
             <option value="youtube">Single Videos Only</option>
             <option value="playlist">Playlists Only</option>
@@ -365,7 +390,7 @@
     </div>
     <div class="drawer-search-wrap">
       <label class="visually-hidden" for="drawer-ch-filter">Filter chapters</label>
-      <input id="drawer-ch-filter" type="search" class="rail-input" placeholder="Search chapter name or number…" spellcheck="false">
+      <input id="drawer-ch-filter" name="drawer_ch_filter" type="search" class="rail-input" placeholder="Search chapter name or number…" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
     <div id="drawer-syllabus-tree" class="syllabus-tree"></div>
   </dialog>
