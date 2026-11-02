@@ -322,19 +322,62 @@
   }
 
   function initThemeToggle() {
+    const syncMetaFromStorage = () => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (!meta) return;
+      try {
+        meta.content = localStorage.getItem("color-scheme") ?? "light dark";
+      } catch {}
+    };
+    window.addEventListener("storage", (e) => {
+      if (e.key === "color-scheme") syncMetaFromStorage();
+    });
     if (!el.themeToggle) return;
     el.themeToggle.addEventListener("click", () => {
       const meta = document.querySelector('meta[name="color-scheme"]');
       if (!meta) return;
       const prefersDark = matchMedia("(prefers-color-scheme: dark)").matches;
-      const currentIsDark =
-        meta.content === "dark" || (meta.content === "light dark" && prefersDark);
-      const next = currentIsDark ? "light" : "dark";
-      meta.content = next;
+      const sysScheme = prefersDark ? "dark" : "light";
+      let stored = null;
       try {
-        localStorage.setItem("color-scheme", next);
+        stored = localStorage.getItem("color-scheme");
       } catch {}
+      const rendered = stored === "dark" || stored === "light" ? stored : sysScheme;
+      const target = rendered === "dark" ? "light" : "dark";
+      if (target === sysScheme) {
+        try {
+          localStorage.removeItem("color-scheme");
+        } catch {}
+        meta.content = "light dark";
+      } else {
+        try {
+          localStorage.setItem("color-scheme", target);
+        } catch {}
+        meta.content = target;
+      }
     });
+  }
+
+  function initLightDismissFallback() {
+    if ("closedBy" in HTMLDialogElement.prototype) return;
+    const outside = (e, dialog) => {
+      const r = dialog.getBoundingClientRect();
+      return (
+        e.clientX < r.left ||
+        e.clientX > r.right ||
+        e.clientY < r.top ||
+        e.clientY > r.bottom
+      );
+    };
+    for (const dialog of document.querySelectorAll('dialog[closedby="any"]')) {
+      let pressedOutside = false;
+      dialog.addEventListener("pointerdown", (e) => {
+        pressedOutside = outside(e, dialog);
+      });
+      dialog.addEventListener("pointerup", (e) => {
+        if (pressedOutside && outside(e, dialog)) dialog.close();
+      });
+    }
   }
 
   function indexRecord(v) {
@@ -1963,6 +2006,7 @@
   async function boot() {
     applyStaticBrandConfig();
     initThemeToggle();
+    initLightDismissFallback();
     bindEvents();
 
     try {
