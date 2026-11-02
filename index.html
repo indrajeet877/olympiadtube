@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" data-platform="olympiad">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    try {
+      document.querySelector('meta[name="color-scheme"]').content =
+        localStorage.getItem("color-scheme") ?? "light dark";
+    } catch {}
+  </script>
+  <title>OlympiadTube — Trending IOQM, RMO, INMO, NSEP, NSEC & INOI Video Masterclasses</title>
+  <meta name="description" content="Zero-noise 40-module Science, Maths & Informatics Olympiad video studio (IOQM, INMO, NSEP, INPhO, NSEC, NSEJS, INOI) ranked purely by YouTube learner traction.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236d28d9'/%3E%3Ctext x='16' y='21.5' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='12' fill='%23ffffff'%3EOLY%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to video solutions</a>
+
+  <!-- Blended Student Tube Ecosystem Topbar -->
+  <header class="site-chrome">
+    <div class="topbar-inner">
+      <a class="brand-lockup" href="./" aria-label="OlympiadTube Home">
+        <span class="brand-glyph" id="brand-glyph" aria-hidden="true">♛</span>
+        <span class="brand-text">
+          <strong id="brand-name">OlympiadTube</strong>
+          <small id="brand-tagline">IOQM · RMO · INMO · NSEP · INOI</small>
+        </span>
+      </a>
+
+      <nav class="ecosystem-nav" aria-label="Student Tube learning platforms" id="ecosystem-nav">
+        <a class="eco-pill is-active" href="https://indrajeet877.github.io/jeetube/" aria-current="page">
+          <span class="eco-dot is-jee" aria-hidden="true"></span>JEETube
+        </a>
+        <a class="eco-pill" href="https://indrajeet877.github.io/neettube/">
+          <span class="eco-dot is-neet" aria-hidden="true"></span>NEETTube
+        </a>
+        <a class="eco-pill" href="https://indrajeet877.github.io/olympiadtube/">
+          <span class="eco-dot is-olympiad" aria-hidden="true"></span>OlympiadTube
+        </a>
+        <a class="eco-pill" href="https://indrajeet877.github.io/upboardtube/">
+          <span class="eco-dot is-upboard" aria-hidden="true"></span>UPBoardTube
+        </a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button type="button" id="open-rescue-btn" class="rescue-trigger-btn">
+          <span aria-hidden="true">✨</span>
+          <span>Solve My Problem</span>
+        </button>
+
+        <button type="button" id="saved-deck-btn" class="utility-pill" aria-pressed="false">
+          <span aria-hidden="true">★</span>
+          <span>Saved</span>
+          <span class="pill-counter" id="cnt-saved">0</span>
+        </button>
+
+        <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle color theme">
+          <span class="theme-option theme-to-dark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+            <span class="visually-hidden">Switch to dark theme</span>
+          </span>
+          <span class="theme-option theme-to-light">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2m-7.07-14.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+            </svg>
+            <span class="visually-hidden">Switch to light theme</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Calm, Magnetic Problem-Solver Hero -->
+  <section class="hero-stage" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div class="hero-eyebrow-row">
+        <span class="trend-live-pill" id="hero-badge">100% Pure YouTube Trend Ranking · Maths, Physics, Chem, Astro &amp; Informatics Olympiads</span>
+        <span class="hero-stat-summary" id="hero-stats">40 Chapters · Loading trending videos…</span>
+      </div>
+
+      <h1 id="hero-title">Cracking an Olympiad problem? Learn from the #1 trending masterclass.</h1>
+      <p class="hero-subtitle" id="hero-subtitle">
+        40 deep-proof and Olympiad problem-solving modules across IOQM/INMO, NSEP/INPhO, NSEC/INChO, NSEJS/NSEA, and ZCO/INOI — ranked strictly by organic YouTube learner traction.
+      </p>
+
+      <search class="spotlight-search-wrap" aria-label="Search chapters, concepts, problems, or educators">
+        <div class="spotlight-box">
+          <label class="visually-hidden" for="q">Search chapters, problems, topics, or teachers</label>
+          <svg class="spotlight-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input
+            id="q"
+            type="search"
+            placeholder="Search any chapter, concept, or teacher (e.g. Rotational torque, GOC, Definite Integration)…"
+            enterkeyhint="search"
+            spellcheck="false"
+          >
+          <kbd id="key-hint" class="key-hint" aria-hidden="true">/</kbd>
+          <button type="button" id="clear-q" class="clear-btn" hidden aria-label="Clear search query">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="quick-problems-row" id="quick-problems" aria-label="Popular student problem shortcuts"></div>
+      </search>
+    </div>
+  </section>
+
+  <p id="subline" class="subline-alert" role="alert" hidden></p>
+
+  <!-- Single Clean Control Ribbon: Subject Worlds + 5 Problem/Trend Modes + Progressive Filter Trigger -->
+  <div class="control-ribbon-wrap">
+    <div class="control-ribbon">
+      <div class="subject-pills" id="subject-tabs" role="radiogroup" aria-label="Filter by subject"></div>
+
+      <div class="ribbon-right">
+        <div class="intent-tabs" role="group" aria-label="Video ranking and study solution mode">
+          <button type="button" class="intent-btn" data-mode="trending" aria-pressed="true">
+            <span aria-hidden="true">🔥</span> Trending
+          </button>
+          <button type="button" class="intent-btn" data-mode="top_rated" aria-pressed="false">
+            <span aria-hidden="true">⭐</span> Most Watched
+          </button>
+          <button type="button" class="intent-btn" data-mode="oneshot" aria-pressed="false">
+            <span aria-hidden="true">⚡</span> 1-Shot Fix
+          </button>
+          <button type="button" class="intent-btn" data-mode="playlists" aria-pressed="false">
+            <span aria-hidden="true">📚</span> Full Courses
+          </button>
+          <button type="button" class="intent-btn" data-mode="pyq" aria-pressed="false">
+            <span aria-hidden="true">🎯</span> Solve PYQs
+          </button>
+        </div>
+
+        <button type="button" id="open-refine-btn" class="refine-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 6h16M7 12h10M10 18h4"/>
+          </svg>
+          <span>Filters</span>
+          <span id="refine-badge" class="pill-counter is-accent" hidden>0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace: Clean Chapter Navigator + Trending Video Stream -->
+  <div class="workspace">
+    <aside class="chapter-rail" aria-label="Syllabus chapter navigator">
+      <div class="rail-header">
+        <div class="rail-title-row">
+          <h2 class="rail-heading">Syllabus Index</h2>
+          <button type="button" id="clear-chapter-btn" class="rail-reset-btn" hidden>All chapters</button>
+        </div>
+        <div class="rail-progress-wrap">
+          <label class="rail-progress-label" for="syllabus-progress">
+            <span>Mastered</span>
+            <strong id="stat-progress">0 / 40</strong>
+          </label>
+          <progress id="syllabus-progress" class="syllabus-progress" value="0" max="40"></progress>
+        </div>
+        <div class="rail-search-box">
+          <label class="visually-hidden" for="ch-filter">Jump to chapter</label>
+          <input id="ch-filter" type="search" class="rail-input" placeholder="Jump to chapter…" spellcheck="false">
+        </div>
+      </div>
+      <nav id="syllabus-tree" class="syllabus-tree" aria-label="Chapters by unit"></nav>
+    </aside>
+
+    <main id="main-content" class="stream-column" tabindex="-1">
+      <div class="stream-toolbar">
+        <div class="stream-toolbar-left">
+          <button type="button" id="open-syllabus-drawer" class="mobile-chapters-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h10"/>
+            </svg>
+            <span id="mobile-ch-label">Chapters</span>
+          </button>
+          <p id="count" class="result-count">Loading trending video solutions…</p>
+          <p id="live-status" class="visually-hidden" aria-live="polite"></p>
+        </div>
+
+        <div class="active-filters" id="active-filters"></div>
+      </div>
+
+      <!-- Dynamic #1 Trending Bento Spotlight (shown on overview) -->
+      <section id="trending-spotlight" class="spotlight-section" aria-labelledby="spotlight-heading" hidden></section>
+
+      <!-- Chapterwise or Leaderboard Video Stream -->
+      <div id="list" class="content-stream"></div>
+    </main>
+  </div>
+
+  <footer id="colophon" class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand-col">
+        <h2 class="footer-heading">Pure Student Traction · Zero Noise</h2>
+        <p id="footer-copy">
+          Every lecture and full-chapter course is ranked strictly by organic YouTube view velocity, total student watch traction, and lesson completeness — never by paid placement or coaching priority. Switch seamlessly across <strong>JEETube</strong>, <strong>NEETTube</strong>, <strong>OlympiadTube</strong>, and <strong>UPBoardTube</strong> in the top bar.
+        </p>
+      </div>
+      <div class="footer-links-col">
+        <h2 class="footer-heading">Ecosystem &amp; Open Data</h2>
+        <ul role="list" id="footer-eco-links">
+          <li><a href="data/videos.json">Open Dataset JSON (<code>data/videos.json</code>)</a></li>
+          <li><a href="https://indrajeet877.github.io/jeetube/">JEETube (IIT-JEE Main &amp; Adv)</a></li>
+          <li><a href="https://indrajeet877.github.io/neettube/">NEETTube (NEET UG Medical)</a></li>
+          <li><a href="https://indrajeet877.github.io/olympiadtube/">OlympiadTube (IOQM · NSEP · INOI)</a></li>
+          <li><a href="https://indrajeet877.github.io/upboardtube/">UPBoardTube (UP Board 10 &amp; 12)</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 1. Interactive "Solve My Problem" Video Prescription Wizard -->
+  <dialog id="rescue-dialog" class="studio-dialog rescue-dialog" closedby="any" aria-labelledby="rescue-title">
+    <div class="dialog-top">
+      <div>
+        <span class="dialog-kicker">✨ Instant Video Prescription</span>
+        <h2 id="rescue-title" class="dialog-heading">What study problem are we solving right now?</h2>
+      </div>
+      <form method="dialog">
+        <button type="submit" class="icon-btn" aria-label="Close problem solver">✕</button>
+      </form>
+    </div>
+
+    <div class="rescue-grid">
+      <div class="rescue-field">
+        <label for="rescue-subject">1. Pick Subject</label>
+        <select id="rescue-subject" class="studio-select"></select>
+      </div>
+      <div class="rescue-field">
+        <label for="rescue-chapter">2. Pick Chapter (or keep All)</label>
+        <select id="rescue-chapter" class="studio-select"></select>
+      </div>
+    </div>
+
+    <fieldset class="rescue-situations">
+      <legend>3. Choose your exact situation</legend>
+      <div class="situation-cards" id="situation-cards">
+        <button type="button" class="situation-card" data-situation="zero" aria-pressed="false">
+          <strong>🧱 Zero Basics</strong>
+          <span>Teach me step-by-step with a full playlist</span>
+        </button>
+        <button type="button" class="situation-card" data-situation="backlog" aria-pressed="true">
+          <strong>⏰ Exam / Backlog Rescue</strong>
+          <span>Finish the whole chapter in #1 trending 1-shot</span>
+        </button>
+        <button type="button" class="situation-card" data-situation="questions" aria-pressed="false">
+          <strong>🧩 Stuck on Questions</strong>
+          <span>PYQ marathons &amp; tough problem-solving</span>
+        </button>
+        <button type="button" class="situation-card" data-situation="quick" aria-pressed="false">
+          <strong>⚡ Under 90 Minutes</strong>
+          <span>Fastest high-velocity revision &amp; formulas</span>
+        </button>
+      </div>
+    </fieldset>
+
+    <div class="rescue-results-head">
+      <h3 id="rescue-results-label">Top 3 Trending Video Prescriptions</h3>
+      <button type="button" id="rescue-apply-main" class="text-action-btn">Open full filtered view →</button>
+    </div>
+    <div id="rescue-results" class="rescue-results"></div>
+  </dialog>
+
+  <!-- 2. Clean Progressive-Disclosure Filters & Sort Sheet -->
+  <dialog id="refine-dialog" class="studio-dialog refine-dialog" closedby="any" aria-labelledby="refine-title">
+    <div class="dialog-top">
+      <div>
+        <span class="dialog-kicker">Precision Controls</span>
+        <h2 id="refine-title" class="dialog-heading">Refine &amp; Sort Videos</h2>
+      </div>
+      <form method="dialog">
+        <button type="submit" class="icon-btn" aria-label="Close filters">✕</button>
+      </form>
+    </div>
+
+    <div class="refine-body">
+      <div class="refine-field">
+        <label for="sort-select">Ranking Order</label>
+        <select id="sort-select" class="studio-select">
+          <option value="trending">🔥 YouTube Trending Velocity (Default)</option>
+          <option value="views">⭐ Most Viewed on YouTube (All-Time)</option>
+          <option value="chapterwise">📖 Syllabus Order (Ch 01 → End)</option>
+          <option value="weightage">🎯 Highest Exam Weightage First</option>
+          <option value="duration_asc">⚡ Quickest Videos First (Duration ↑)</option>
+          <option value="duration_desc">⏱ Longest Marathons First (Duration ↓)</option>
+          <option value="lessons">📚 Deepest Playlists First (Lectures ↓)</option>
+        </select>
+      </div>
+
+      <div class="refine-field">
+        <label for="unit-select">Unit / Branch</label>
+        <select id="unit-select" class="studio-select">
+          <option value="">All Syllabus Units</option>
+        </select>
+      </div>
+
+      <div class="refine-field">
+        <label for="educator-select">Teacher / YouTube Channel</label>
+        <select id="educator-select" class="studio-select">
+          <option value="">All Educators &amp; Channels</option>
+        </select>
+      </div>
+
+      <div class="refine-two-col">
+        <div class="refine-field">
+          <label for="exam-select">Target Tier</label>
+          <select id="exam-select" class="studio-select">
+            <option value="all">All Tiers</option>
+          </select>
+        </div>
+
+        <div class="refine-field">
+          <label for="class-select">Class / Stage</label>
+          <select id="class-select" class="studio-select">
+            <option value="all">All Classes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="refine-two-col">
+        <div class="refine-field">
+          <label for="lang-select">Teaching Medium</label>
+          <select id="lang-select" class="studio-select">
+            <option value="all">All Languages</option>
+          </select>
+        </div>
+
+        <div class="refine-field">
+          <label for="type-select">YouTube Format</label>
+          <select id="type-select" class="studio-select">
+            <option value="all">Videos + Playlists</option>
+            <option value="youtube">Single Videos Only</option>
+            <option value="playlist">Playlists Only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button type="button" id="refine-reset-btn" class="secondary-btn">Reset All</button>
+      <form method="dialog">
+        <button type="submit" class="primary-btn">Show Matching Videos</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 3. Mobile Syllabus Chapter Drawer -->
+  <dialog id="syllabus-dialog" class="studio-dialog syllabus-dialog" closedby="any" aria-labelledby="drawer-title">
+    <div class="dialog-top">
+      <h2 id="drawer-title" class="dialog-heading">Jump to Chapter</h2>
+      <form method="dialog">
+        <button type="submit" class="icon-btn" aria-label="Close chapter drawer">✕</button>
+      </form>
+    </div>
+    <div class="drawer-search-wrap">
+      <label class="visually-hidden" for="drawer-ch-filter">Filter chapters</label>
+      <input id="drawer-ch-filter" type="search" class="rail-input" placeholder="Search chapter name or number…" spellcheck="false">
+    </div>
+    <div id="drawer-syllabus-tree" class="syllabus-tree"></div>
+  </dialog>
+
+  <!-- 4. Distraction-Free Theater Video Player -->
+  <dialog id="player-dialog" class="studio-dialog player-dialog" closedby="any" aria-labelledby="player-title">
+    <div class="dialog-top">
+      <div class="player-meta-row">
+        <span id="player-badge" class="trend-chip is-hot"></span>
+        <span id="player-channel" class="player-channel"></span>
+      </div>
+      <div class="player-top-actions">
+        <a id="player-ext" class="yt-external-cta" href="#" target="_blank" rel="noopener noreferrer">
+          Open on YouTube <span aria-hidden="true">↗</span>
+        </a>
+        <form method="dialog">
+          <button type="submit" class="icon-btn" aria-label="Close video player">✕</button>
+        </form>
+      </div>
+    </div>
+    <h2 id="player-title" class="player-title"></h2>
+    <div id="player-stage" class="player-stage"></div>
+    <div id="player-samples" class="player-samples" hidden></div>
+  </dialog>
+
+  <noscript>
+    <p class="noscript-banner">Enable JavaScript to browse and search trending chapterwise video solutions.</p>
+  </noscript>
+  <script src="site-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
