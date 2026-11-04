@@ -25,8 +25,8 @@ window.TUBE_CONFIG = {
     "Maths Olympiad": { icon: "♛", short: "Maths MO", tone: "s4" },
     "Physics Olympiad": { icon: "∇", short: "Physics", tone: "s2" },
     "Chemistry Olympiad": { icon: "⇌", short: "Chemistry", tone: "s3" },
-    "Jr Science & Astronomy": { icon: "✦", short: "NSEJS · Bio · Astro", tone: "s5" },
-    "Informatics Olympiad": { icon: "⌘", short: "INOI · Code", tone: "s6" },
+    "Jr Science & Astronomy": { icon: "✦", short: "Jr Sci · Astro", tone: "s5" },
+    "Informatics Olympiad": { icon: "⌘", short: "INOI · CS", tone: "s6" },
   },
   acronyms: {
     1: "mod gcd lcm crt bezout modular arithmetic primes divisibility",
