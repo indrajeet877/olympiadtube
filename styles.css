@@ -384,7 +384,7 @@ button {
   text-decoration: none;
   border: 1px solid transparent;
   white-space: nowrap;
-  transition: background-color 0.14s ease, border-color 0.14s ease;
+  transition: border-color 0.14s ease;
 }
 
 .eco-pill:hover {
@@ -575,7 +575,7 @@ button {
   align-items: center;
   gap: 5px;
   white-space: nowrap;
-  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  transition: border-color 0.12s ease;
 }
 
 .subj-pill-btn:hover {
@@ -1871,11 +1871,13 @@ dialog::backdrop {
   display: none;
 }
 
-/* Medium Desktop Adjustment (1024px - 1279px) */
-@media (min-width: 1024px) and (max-width: 1279px) {
+@media (min-width: 1024px) and (max-width: 1420px) {
   .utility-stats {
     display: none;
   }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
   .share-btn-text {
     display: none;
   }
@@ -2245,4 +2247,874 @@ dialog::backdrop {
   background: var(--hot-soft);
   color: var(--hot);
   font-weight: 700;
+}
+
+
+/* ==========================================================================
+   9. STUDIO v4.0 — STUDENT CLARITY & PEDAGOGICAL DISCOVERY ENGINE
+   3-Tap Visual Compass · Voice/Phonetic Search · 1-2-3 Chapter Roadmap ·
+   Teaching Vibe Badges · Offline Progress & Revision List
+   ========================================================================== */
+
+/* Revision List Utility Button */
+.utility-pill.is-revision-list {
+  gap: 5px;
+  padding-inline: 10px;
+  font-weight: 750;
+}
+
+.utility-pill.is-revision-list[aria-pressed="true"] {
+  background: #d97706;
+  border-color: #d97706;
+  color: #ffffff;
+}
+
+.revision-btn-label {
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 1350px) {
+  .revision-btn-label {
+    display: none;
+  }
+}
+
+/* 1-Tap Voice Search Button Inside #q Search Bar */
+.voice-btn {
+  height: 32px;
+  min-width: 34px;
+  padding: 0 8px;
+  margin-right: 3px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--brand) 38%, var(--border-subtle));
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 0.74rem;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.voice-btn:hover {
+  border-color: var(--brand);
+  filter: brightness(0.98);
+}
+
+.voice-btn.is-listening,
+.voice-btn[aria-pressed="true"] {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+@keyframes voicePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .voice-btn.is-listening {
+    animation: voicePulse 1.35s infinite;
+  }
+}
+
+/* Bilingual Chapter Stack in Sidebar & Mobile Sheet */
+.ch-name-stack {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ch-sub-hi {
+  font-size: 0.68rem;
+  font-weight: 550;
+  opacity: 0.78;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ch-roi-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.drawer-progress-strip {
+  padding: 6px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: var(--wa);
+}
+
+/* Zero-Typing 3-Tap Visual Compass */
+.visual-compass {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--brand) 30%, var(--border-subtle));
+  border-radius: var(--r-md);
+  padding: 8px 10px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.compass-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.compass-title-wrap {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compass-heading {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.compass-toggle-btn {
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 0.72rem;
+  font-weight: 750;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.compass-toggle-btn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.compass-body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.compass-step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .compass-step:first-child {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .compass-step:first-child .compass-step-badge {
+    flex-shrink: 0;
+  }
+
+  .compass-step3-bar {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .compass-step3-bar .compass-step-badge {
+    flex-shrink: 0;
+  }
+
+  .compass-step3-bar .compass-ch-picker-row {
+    flex: 1 1 auto;
+  }
+}
+
+.compass-step-badge {
+  font-size: 0.69rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--brand);
+}
+
+/* Tap 1: Visible Native Script Language Pills */
+.compass-lang-strip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  touch-action: pan-x pan-y;
+}
+
+.compass-lang-pill {
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 750;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.compass-lang-pill:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.compass-lang-pill[aria-pressed="true"] {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+
+.compass-lang-cnt {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  opacity: 0.82;
+}
+
+/* Tap 2: 4 Honest Student Situation Cards */
+.situation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.situation-card {
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--ink);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  cursor: pointer;
+  transition: border-color 0.14s ease;
+}
+
+.situation-card:hover {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand-soft) 45%, var(--surface));
+}
+
+.situation-card[aria-pressed="true"] {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  box-shadow: inset 0 0 0 1px var(--brand);
+}
+
+.situation-title {
+  font-size: 0.77rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.situation-desc {
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
+/* Tap 3: Textbook Chapter Select + Native-Script Quick Chips */
+.compass-step3-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.compass-ch-picker-row {
+  display: grid;
+  grid-template-columns: minmax(230px, 320px) minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.compass-ch-select {
+  min-height: 36px;
+  height: 36px;
+  font-size: 0.78rem;
+}
+
+.compass-ch-strip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  touch-action: pan-x pan-y;
+}
+
+.compass-ch-pill {
+  min-height: 32px;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.compass-ch-pill:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.compass-ch-pill.is-active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+
+/* Phonetic Hinglish / Voice Match Banner */
+.phonetic-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--brand) 42%, var(--border-subtle));
+  background: var(--brand-soft);
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+
+.phonetic-banner strong {
+  color: var(--brand);
+}
+
+.phonetic-jump-btn {
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--brand);
+  background: var(--surface);
+  color: var(--brand);
+  font-size: 0.73rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   THE "1 -> 2 -> 3 CHAPTER ROADMAP" & PREREQUISITE BRIDGE
+   ========================================================================== */
+.chapter-roadmap {
+  background: var(--surface);
+  border: 1.5px solid color-mix(in srgb, var(--brand) 45%, var(--border-subtle));
+  border-radius: var(--r-md);
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.roadmap-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.roadmap-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.roadmap-badges-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.roadmap-ch-tag {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-family: var(--mono);
+  font-size: 0.71rem;
+  font-weight: 800;
+}
+
+.roi-badge {
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  font-size: 0.71rem;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+
+.roi-badge.is-easy {
+  background: var(--wa-soft);
+  color: var(--wa);
+  border-color: color-mix(in srgb, var(--wa) 35%, transparent);
+}
+
+.roi-badge.is-core {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border-color: color-mix(in srgb, var(--brand) 35%, transparent);
+}
+
+.roi-badge.is-heavy {
+  background: var(--hot-soft);
+  color: var(--hot);
+  border-color: color-mix(in srgb, var(--hot) 35%, transparent);
+}
+
+.roadmap-h2 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 850;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.roadmap-sub-hi {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.roadmap-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.roadmap-done-btn,
+.roadmap-wa-btn {
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: var(--r-sm);
+  font-size: 0.76rem;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.roadmap-done-btn {
+  border: 1px solid var(--border-control);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.roadmap-done-btn[aria-pressed="true"] {
+  border-color: var(--wa);
+  background: var(--wa);
+  color: #ffffff;
+}
+
+.roadmap-wa-btn {
+  border: 1px solid color-mix(in srgb, var(--wa) 45%, var(--border-subtle));
+  background: var(--wa-soft);
+  color: var(--wa);
+}
+
+/* Prerequisite Bridge ("Know This First") */
+.prereq-bridge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--hot-soft) 55%, var(--surface-2));
+  border-left: 3.5px solid var(--hot);
+  font-size: 0.79rem;
+  color: var(--ink);
+}
+
+.prereq-bridge.is-starter {
+  background: color-mix(in srgb, var(--wa-soft) 55%, var(--surface-2));
+  border-left-color: var(--wa);
+}
+
+.prereq-text {
+  flex: 1 1 260px;
+  line-height: 1.35;
+}
+
+.roadmap-prereq-btn {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--brand);
+  background: var(--surface);
+  color: var(--brand);
+  font-size: 0.74rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.roadmap-prereq-btn:hover {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+/* Guided 3-Step Video Sequence ("Where Should I Click First?") */
+.roadmap-seq-head {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.roadmap-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.roadmap-step-card {
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.step-kicker {
+  font-size: 0.72rem;
+  font-weight: 850;
+  color: var(--brand);
+}
+
+.step-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 750;
+  color: var(--ink);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.step-meta {
+  font-size: 0.7rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step-actions {
+  margin-top: auto;
+  padding-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.step-watch-btn,
+.step-save-btn,
+.step-yt-btn {
+  min-height: 32px;
+  border-radius: var(--r-xs);
+  font-size: 0.72rem;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.step-watch-btn {
+  flex: 1 1 auto;
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: var(--brand-ink);
+  padding: 0 8px;
+}
+
+.step-save-btn {
+  min-width: 32px;
+  padding: 0 7px;
+  border: 1px solid var(--border-control);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.step-save-btn[aria-pressed="true"] {
+  border-color: #d97706;
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+.step-yt-btn {
+  padding: 0 8px;
+  border: 1px solid var(--border-control);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   HUMAN-FRIENDLY "TEACHING VIBE" BADGES & STUDY TRACKER ON EVERY CARD
+   ========================================================================== */
+.vibe-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  min-width: 0;
+}
+
+.vibe-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 0.69rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vibe-badge.is-beginner {
+  background: var(--wa-soft);
+  color: var(--wa);
+}
+
+.vibe-badge.is-oneshot {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.vibe-badge.is-pyq {
+  background: var(--hot-soft);
+  color: var(--hot);
+}
+
+.vibe-badge.is-recap {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+/* Per-Card Progress & Revision Tracker Strip */
+.card-tracker-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 5px;
+}
+
+.card-done-btn,
+.card-revise-btn {
+  min-height: 28px;
+  padding: 0 6px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 0.69rem;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.card-done-btn:hover,
+.card-revise-btn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.card-done-btn[aria-pressed="true"] {
+  background: var(--wa-soft);
+  border-color: color-mix(in srgb, var(--wa) 48%, transparent);
+  color: var(--wa);
+}
+
+.card-revise-btn[aria-pressed="true"] {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: #f59e0b;
+  color: #d97706;
+}
+
+.yt-external-cta.is-done-toggle[aria-pressed="true"] {
+  background: var(--wa);
+  border-color: var(--wa);
+  color: #ffffff;
+}
+
+/* Bilingual Subtitle in Chapter Shelf Headers */
+.chapter-sub-hi {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 2px;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .chapter-header {
+    flex-wrap: nowrap;
+  }
+
+  .chapter-title-cluster {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .chapter-heading {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Mobile & Coarse Pointer Ergonomics for All Studio v4.0 Controls */
+@media (max-width: 1023px) {
+  .voice-btn {
+    min-width: 44px;
+    min-height: 44px;
+    height: 44px;
+    padding: 0 10px;
+  }
+
+  .voice-btn-txt {
+    display: none;
+  }
+
+  .compass-toggle-btn,
+  .compass-lang-pill,
+  .compass-ch-pill,
+  .phonetic-jump-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding-inline: 12px;
+    font-size: 0.8rem;
+  }
+
+  .situation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  @media (max-width: 380px) {
+    .situation-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .situation-card {
+    min-height: 52px;
+    padding: 8px 10px;
+  }
+
+  .compass-ch-picker-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compass-ch-select {
+    min-height: 46px;
+    height: 46px;
+  }
+
+  .roadmap-steps-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .roadmap-done-btn,
+  .roadmap-wa-btn,
+  .roadmap-prereq-btn,
+  .step-watch-btn,
+  .step-save-btn,
+  .step-yt-btn,
+  .card-done-btn,
+  .card-revise-btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 0.76rem;
+  }
 }

@@ -8,7 +8,8 @@
       brandSymbol: "∑",
       tagline: "IIT-JEE · State CETs · BITSAT",
       storagePrefix: "jeetube",
-      searchPlaceholder: "Search chapter, topic, or teacher…",
+      searchPlaceholder:
+        "Type or 🎤 speak: Samakalan, Bijli, Ch 1, Om Sharma…",
       quickProblems: [],
       subjectMeta: {},
       acronyms: {},
@@ -17,110 +18,307 @@
     window.TUBE_CONFIG || {}
   );
 
+  const PEDAGOGY = Object.assign(
+    { synonyms: [], chapters: {} },
+    window.TUBE_PEDAGOGY || {}
+  );
+
   const BASE_TITLE = document.title;
   const SAVED_KEY = `${CFG.storagePrefix}_saved_v2`;
   const DONE_KEY = `${CFG.storagePrefix}_done_v2`;
-  const ROLE_KEY = `${CFG.storagePrefix}_role_v3`;
+  const DONE_VIDEOS_KEY = `${CFG.storagePrefix}_done_videos_v4`;
+  const ROLE_KEY = `${CFG.storagePrefix}_role_v4`;
   const CARDS_PER_CHAPTER_COLLAPSED = 4;
   const FLAT_PAGE_SIZE = 48;
 
+  const COMPASS_LANG_ORDER = [
+    "Hinglish",
+    "Hindi",
+    "Hindi Medium",
+    "Hindi / Hinglish",
+    "English",
+    "Tamil",
+    "Telugu",
+    "Marathi",
+    "Bengali",
+    "Gujarati",
+    "Kannada",
+    "Malayalam",
+    "Odia",
+    "Punjabi",
+    "Assamese",
+  ];
+
   const LANGUAGE_META = {
     Hinglish: {
+      pill: "Hinglish",
       badge: "Hinglish",
       option: "Hinglish (Hindi + Eng)",
       aliases: "hinglish hindi english mix",
       regional: false,
+      speech: "hi-IN",
     },
     English: {
+      pill: "English",
       badge: "English",
       option: "English Medium",
       aliases: "english medium pure english",
       regional: false,
+      speech: "en-IN",
     },
     Hindi: {
+      pill: "हिंदी",
       badge: "हिंदी · Hindi",
       option: "हिंदी · Hindi",
       aliases: "hindi medium हिंदी माध्यम हिन्दी bseb upmsp rbse mp board",
       regional: true,
+      speech: "hi-IN",
+    },
+    "Hindi Medium": {
+      pill: "हिंदी",
+      badge: "हिंदी · Hindi",
+      option: "हिंदी माध्यम · Hindi Medium",
+      aliases: "hindi medium हिंदी माध्यम हिन्दी up board upmsp",
+      regional: true,
+      speech: "hi-IN",
     },
     "Hindi / Hinglish": {
+      pill: "हिंदी · Hinglish",
       badge: "हिंदी · Hinglish",
       option: "हिंदी · Hindi / Hinglish",
       aliases: "hindi hinglish हिंदी माध्यम हिन्दी",
-      regional: false,
-    },
-    Telugu: {
-      badge: "తెలుగు · Telugu",
-      option: "తెలుగు · Telugu",
-      aliases: "telugu తెలుగు ap ts eapcet eamcet ipe andhra telangana",
       regional: true,
+      speech: "hi-IN",
     },
     Tamil: {
+      pill: "தமிழ்",
       badge: "தமிழ் · Tamil",
       option: "தமிழ் · Tamil",
       aliases: "tamil தமிழ் tn state board tamilnadu",
       regional: true,
+      speech: "ta-IN",
     },
-    Malayalam: {
-      badge: "മലയാളം · Malayalam",
-      option: "മലയാളം · Malayalam",
-      aliases: "malayalam മലയാളം kerala keam plus two sslc",
+    Telugu: {
+      pill: "తెలుగు",
+      badge: "తెలుగు · Telugu",
+      option: "తెలుగు · Telugu",
+      aliases: "telugu తెలుగు ap ts eapcet eamcet ipe andhra telangana",
       regional: true,
-    },
-    Kannada: {
-      badge: "ಕನ್ನಡ · Kannada",
-      option: "ಕನ್ನಡ · Kannada",
-      aliases: "kannada ಕನ್ನಡ karnataka kcet puc",
-      regional: true,
+      speech: "te-IN",
     },
     Marathi: {
+      pill: "मराठी",
       badge: "मराठी · Marathi",
       option: "मराठी · Marathi",
       aliases: "marathi मराठी maharashtra mht cet mhtcet hsc ssc",
       regional: true,
+      speech: "mr-IN",
     },
     Bengali: {
+      pill: "বাংলা",
       badge: "বাংলা · Bengali",
       option: "বাংলা · Bengali",
       aliases: "bengali bangla বাংলা wbjee wbchse madhyamik west bengal",
       regional: true,
+      speech: "bn-IN",
     },
     Gujarati: {
+      pill: "ગુજરાતી",
       badge: "ગુજરાતી · Gujarati",
       option: "ગુજરાતી · Gujarati",
       aliases: "gujarati ગુજરાતી gujcet gseb gujarat",
       regional: true,
+      speech: "gu-IN",
+    },
+    Kannada: {
+      pill: "ಕನ್ನಡ",
+      badge: "ಕನ್ನಡ · Kannada",
+      option: "ಕನ್ನಡ · Kannada",
+      aliases: "kannada ಕನ್ನಡ karnataka kcet puc",
+      regional: true,
+      speech: "kn-IN",
+    },
+    Malayalam: {
+      pill: "മലയാളം",
+      badge: "മലയാളം · Malayalam",
+      option: "മലയാളം · Malayalam",
+      aliases: "malayalam മലയാളം kerala keam plus two sslc",
+      regional: true,
+      speech: "ml-IN",
     },
     Odia: {
+      pill: "ଓଡ଼ିଆ",
       badge: "ଓଡ଼ିଆ · Odia",
       option: "ଓଡ଼ିଆ · Odia",
       aliases: "odia oriya ଓଡ଼ିଆ ojee chse odisha",
       regional: true,
+      speech: "or-IN",
     },
     Punjabi: {
+      pill: "ਪੰਜਾਬੀ",
       badge: "ਪੰਜਾਬੀ · Punjabi",
       option: "ਪੰਜਾਬੀ · Punjabi",
       aliases: "punjabi ਪੰਜਾਬੀ pseb punjab",
       regional: true,
+      speech: "pa-IN",
     },
     Assamese: {
+      pill: "অসমীয়া",
       badge: "অসমীয়া · Assamese",
       option: "অসমীয়া · Assamese",
       aliases: "assamese অসমীয়া ahsec seba assam",
       regional: true,
+      speech: "en-IN",
     },
   };
+
+  const STUDENT_SITUATIONS = [
+    {
+      key: "zero_to_hero",
+      title: "🌱 Start From Zero (Basic to Full)",
+      desc: "I missed classes or didn't understand this chapter. Teach me from scratch.",
+    },
+    {
+      key: "exam_tomorrow",
+      title: "⚡ Exam Tomorrow (1-Shot Revision)",
+      desc: "Give me the best complete chapter revision in 1 video.",
+    },
+    {
+      key: "solve_pyqs",
+      title: "🎯 Solve Exam Questions (PYQs)",
+      desc: "I know the theory, show me how to solve past exam questions.",
+    },
+    {
+      key: "easy_scoring",
+      title: "🏆 Easy High-Scoring Chapters First",
+      desc: "Show me the chapters that give the most marks with the least effort.",
+    },
+  ];
 
   function getLangMeta(lang) {
     const key = String(lang || "").trim();
     return (
       LANGUAGE_META[key] || {
+        pill: key || "Hinglish",
         badge: key || "Hinglish",
         option: key || "Hinglish",
         aliases: key.toLowerCase(),
         regional: false,
+        speech: "en-IN",
       }
     );
+  }
+
+  function getChapterPedagogy(chNo) {
+    const platMap = (PEDAGOGY.chapters && PEDAGOGY.chapters[CFG.platformId]) || {};
+    const entry = platMap[String(chNo)] || {};
+    return {
+      hi: entry.hi || "",
+      ref: entry.ref || `Ch ${String(chNo).padStart(2, "0")}`,
+      roi: entry.roi || "core_high",
+      prereq: Number(entry.prereq) || 0,
+      tip:
+        entry.tip ||
+        "Start with Step 1 for foundational clarity, then revise and practice exam questions.",
+      sub_idx: Number(entry.sub_idx) || Number(chNo) || 1,
+    };
+  }
+
+  function getRoiMeta(roi) {
+    if (roi === "easy_high") {
+      return {
+        label: "🟢 Easy Scoring Chapter · 🎯 High Weightage",
+        shortTag: "🟢 Easy Scoring",
+        cls: "is-easy",
+        rank: 4,
+        isEasy: true,
+      };
+    }
+    if (roi === "quick_marks") {
+      return {
+        label: "🟢 Easy Scoring Chapter",
+        shortTag: "🟢 Easy Marks",
+        cls: "is-easy",
+        rank: 3,
+        isEasy: true,
+      };
+    }
+    if (roi === "practice_heavy") {
+      return {
+        label: "🔴 High Practice Required · 🎯 High Weightage",
+        shortTag: "🔴 High Practice",
+        cls: "is-heavy",
+        rank: 1,
+        isEasy: false,
+      };
+    }
+    return {
+      label: "🎯 High Weightage Chapter",
+      shortTag: "🎯 High Weightage",
+      cls: "is-core",
+      rank: 2,
+      isEasy: false,
+    };
+  }
+
+  function classifyTeachingVibe(v) {
+    const title = String(v.title || "");
+    const titleFmt = `${title} ${v.format || ""}`;
+    const sec = Number(v.duration_sec) || 0;
+    const lessons = Number(v.lesson_count) || 0;
+    const isPlaylist =
+      v.provider === "playlist" || v.format === "Full Course" || lessons >= 3;
+    const isExplicitOneShot =
+      /\bone\s*-?\s*shot\b|\b1\s*-?\s*shot\b|complete\s+chapter\s+in\s+one|full\s+chapter\s+in\s+1/i.test(
+        title
+      );
+
+    if (
+      isPlaylist ||
+      (!isExplicitOneShot &&
+        /zero\s+to\s+hero|basic\s+to\s+(?:advanced|full|pro)|from\s+zero|from\s+scratch|full\s+playlist|complete\s+playlist|complete\s+course|foundation\s+course|\blecture\s*0?1\b|\blec\s*0?1\b/i.test(
+          titleFmt
+        ))
+    ) {
+      return {
+        key: "beginner",
+        cls: "is-beginner",
+        label: "🌱 Beginner Friendly (Zero to Hero)",
+      };
+    }
+
+    if (
+      !isExplicitOneShot &&
+      (v.format === "PYQ & Mock" ||
+        /\bpyqs?\b|previous\s+year|numericals?|question\s+bank|top\s+\d+\s+questions|most\s+expected\s+questions|sample\s+paper|model\s+paper|paper\s+solution|walkthrough|mock\s+test|olympiad\s+problems|problem\s+solving|\bimo\s+problem\b|\bolympiad\s+problem\b/i.test(
+          titleFmt
+        ))
+    ) {
+      return {
+        key: "pyq",
+        cls: "is-pyq",
+        label: "📝 Past Year Questions (PYQs)",
+      };
+    }
+
+    if (
+      (sec > 0 && sec <= 3600) ||
+      /formula\s+(?:sheet|revision|marathon|recap)|all\s+formulas|mind\s*-?\s*map|short\s+notes|cheat\s+sheet|quick\s+recap|in\s+(?:15|20|30|40|45|50)\s*min/i.test(
+        titleFmt
+      )
+    ) {
+      return {
+        key: "recap",
+        cls: "is-recap",
+        label: "🚀 Quick Formula Recap",
+      };
+    }
+
+    return {
+      key: "oneshot",
+      cls: "is-oneshot",
+      label: "⚡ Complete 1-Shot Revision",
+    };
   }
 
   function loadSet(key) {
@@ -144,8 +342,10 @@
       const saved = localStorage.getItem(ROLE_KEY);
       if (saved === "student" || saved === "teacher") return saved;
     } catch {}
-    return "teacher";
+    return "student";
   }
+
+  const initialRole = loadInitialRole();
 
   const state = {
     meta: null,
@@ -156,7 +356,8 @@
     allExams: [],
     allEducators: [],
     videos: [],
-    userRole: loadInitialRole(),
+    userRole: initialRole,
+    compassCollapsed: initialRole === "teacher",
     subject: "All",
     classLevel: "all",
     chapterNo: 0,
@@ -169,8 +370,11 @@
     flatLimit: FLAT_PAGE_SIZE,
     saved: loadSet(SAVED_KEY),
     doneChapters: loadSet(DONE_KEY),
+    doneVideos: loadSet(DONE_VIDEOS_KEY),
     pickerKind: "lang",
     activePlayerVideo: null,
+    isListening: false,
+    voiceFallbackOpen: false,
   };
 
   const el = {
@@ -191,6 +395,7 @@
     q: document.getElementById("q"),
     keyHint: document.getElementById("key-hint"),
     clearQ: document.getElementById("clear-q"),
+    voiceSearchBtn: document.getElementById("voice-search-btn"),
     langSelect: document.getElementById("lang-select"),
     examSelect: document.getElementById("exam-select"),
     educatorSelect: document.getElementById("educator-select"),
@@ -204,11 +409,18 @@
     syllabusTree: document.getElementById("syllabus-tree"),
     liveStatus: document.getElementById("live-status"),
     count: document.getElementById("count"),
-    studentShortcutsBar: document.getElementById("student-shortcuts-bar"),
-    quickProblems: document.getElementById("quick-problems"),
+    visualCompass: document.getElementById("visual-compass"),
+    compassToggleBtn: document.getElementById("compass-toggle-btn"),
+    compassBody: document.getElementById("compass-body"),
+    compassLangs: document.getElementById("compass-langs"),
+    compassSituations: document.getElementById("compass-situations"),
+    compassChapterSelect: document.getElementById("compass-chapter-select"),
+    compassChapters: document.getElementById("compass-chapters"),
+    phoneticBanner: document.getElementById("phonetic-banner"),
     activeFiltersBar: document.getElementById("active-filters-bar"),
     activeSummary: document.getElementById("active-summary"),
     activeFilters: document.getElementById("active-filters"),
+    chapterRoadmap: document.getElementById("chapter-roadmap"),
     list: document.getElementById("list"),
     mobChaptersBtn: document.getElementById("mob-chapters-btn"),
     mobChLabel: document.getElementById("mob-ch-label"),
@@ -219,6 +431,7 @@
     mobShareBtn: document.getElementById("mob-share-btn"),
     syllabusDialog: document.getElementById("syllabus-dialog"),
     drawerAllChBtn: document.getElementById("drawer-all-ch-btn"),
+    drawerStatProgress: document.getElementById("drawer-stat-progress"),
     drawerChFilter: document.getElementById("drawer-ch-filter"),
     drawerSyllabusTree: document.getElementById("drawer-syllabus-tree"),
     pickerDialog: document.getElementById("picker-dialog"),
@@ -233,6 +446,7 @@
     playerDialog: document.getElementById("player-dialog"),
     playerBadge: document.getElementById("player-badge"),
     playerChannel: document.getElementById("player-channel"),
+    playerDoneBtn: document.getElementById("player-done-btn"),
     playerShareBtn: document.getElementById("player-share-btn"),
     playerExt: document.getElementById("player-ext"),
     playerTitle: document.getElementById("player-title"),
@@ -245,6 +459,7 @@
   };
 
   let toastTimer = null;
+  let speechRecognizer = null;
 
   function pad2(n) {
     return String(n).padStart(2, "0");
@@ -281,6 +496,11 @@
     if (!words.length) return "YT";
     if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
     return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  function shortHindiLabel(hiText) {
+    if (!hiText) return "";
+    return String(hiText).split("·")[0].trim();
   }
 
   function getDurationBadge(v) {
@@ -336,10 +556,15 @@
       if (vDiff !== 0) return vDiff;
       return comparePureTrend(a, b);
     }
+    if (sortKey === "zero_to_hero") {
+      const aPl = a.provider === "playlist" ? 1 : 0;
+      const bPl = b.provider === "playlist" ? 1 : 0;
+      if (bPl !== aPl) return bPl - aPl;
+      return comparePureTrend(a, b);
+    }
     return comparePureTrend(a, b);
   }
 
-  /* Class / Level Definitions Across All 5 Platforms */
   function getPlatformClassDefs() {
     if (CFG.platformId === "board" || CFG.platformId === "upboard") {
       return [
@@ -390,15 +615,33 @@
     return v.class_level === classKey;
   }
 
-  function matchesSortScope(v, sortKey) {
+  function matchesSortScope(v, sortKey, activeChapterNo) {
+    if (sortKey === "zero_to_hero") {
+      return (
+        v._vibe.key === "beginner" ||
+        v.provider === "playlist" ||
+        (Number(v.duration_sec) || 0) >= 5400
+      );
+    }
+    if (sortKey === "exam_tomorrow") {
+      return (
+        v._vibe.key === "oneshot" ||
+        v._vibe.key === "recap" ||
+        Boolean(v._isQuickRevision)
+      );
+    }
+    if (sortKey === "solve_pyqs" || sortKey === "pyq") {
+      return v._vibe.key === "pyq" || Boolean(v._isPyq);
+    }
+    if (sortKey === "easy_scoring") {
+      if (activeChapterNo > 0) return true;
+      return Boolean(v._roiMeta?.isEasy);
+    }
     if (sortKey === "quick_revision") {
-      return Boolean(v._isQuickRevision);
+      return Boolean(v._isQuickRevision) || v._vibe.key === "recap";
     }
     if (sortKey === "playlists") {
       return v.provider === "playlist" || v.format === "Full Course";
-    }
-    if (sortKey === "pyq") {
-      return Boolean(v._isPyq);
     }
     return true;
   }
@@ -406,6 +649,12 @@
   function indexRecord(v) {
     const chExtra = CFG.acronyms[v.chapter_no] || "";
     const langMeta = getLangMeta(v.language);
+    const ped = getChapterPedagogy(v.chapter_no);
+    const roiMeta = getRoiMeta(ped.roi);
+    v._ped = ped;
+    v._roiMeta = roiMeta;
+    v._vibe = classifyTeachingVibe(v);
+
     const tx = String(v.target_exam || "").toLowerCase();
     let examExtra = "";
     if (tx.includes("cet") || tx.includes("bitsat")) {
@@ -422,6 +671,8 @@
     const titleAndFmt = `${v.title || ""} ${v.format || ""}`;
     v._isQuickRevision =
       v.format === "One-Shot" ||
+      v._vibe.key === "oneshot" ||
+      v._vibe.key === "recap" ||
       (v.provider === "youtube" &&
         (/one\s*-?\s*shot|complete\s+chapter|full\s+chapter|marathon|mahamarathon|rapid\s+revision|quick\s+revision|in\s+\d+\s*hours?/i.test(
           titleAndFmt
@@ -429,6 +680,7 @@
           (Number(v.duration_sec) >= 900 && Number(v.duration_sec) <= 10800)));
 
     v._isPyq =
+      v._vibe.key === "pyq" ||
       v.format === "PYQ & Mock" ||
       /pyq|previous\s+year|problem|questions?|mock|booster|ranker|challenge|paper|olympiad\s+problems|numericals?|ncert\s+solutions?|important\s+questions/i.test(
         titleAndFmt
@@ -457,7 +709,12 @@
       v.title,
       v.chapter,
       `ch ${v.chapter_no}`,
+      `ch ${pad2(v.chapter_no)}`,
       `chapter ${v.chapter_no}`,
+      ped.hi,
+      ped.ref,
+      `ncert ch ${ped.sub_idx}`,
+      v._vibe.label,
       v.unit,
       v.subject,
       v.educator,
@@ -476,6 +733,234 @@
       .toLowerCase();
   }
 
+  /* ==========================================================================
+     PHONETIC HINGLISH / DESI KEYWORD & CHAPTER NUMBER ANALYZER
+     ========================================================================== */
+  function matchSubjectKeyword(normText) {
+    const rules = [
+      {
+        re: /\b(?:maths?|mathematics|ganit)\b|गणित/i,
+        match: (s) => /math|गणित/i.test(s),
+      },
+      {
+        re: /\b(?:physics|phy|bhautik|bhautiki)\b|भौतिक/i,
+        match: (s) => /phys|भौतिक/i.test(s),
+      },
+      {
+        re: /\b(?:chemistry|chem|rasayan)\b|रसायन/i,
+        match: (s) => /chem|रसायन/i.test(s),
+      },
+      {
+        re: /\b(?:botany|padap)\b|वनस्पति/i,
+        match: (s) => /botany|bio|जीव/i.test(s),
+      },
+      {
+        re: /\b(?:zoology|jantu)\b|प्राणी/i,
+        match: (s) => /zoology|bio|जीव/i.test(s),
+      },
+      {
+        re: /\b(?:biology|bio|jeev\s*vigyan)\b|जीव\s*विज्ञान|जीवविज्ञान/i,
+        match: (s) => /bio|botany|zoology|जीव/i.test(s),
+      },
+      {
+        re: /\b(?:science|vigyan)\b|विज्ञान/i,
+        match: (s) => /science|विज्ञान/i.test(s),
+      },
+      {
+        re: /\b(?:social\s*science|sst|samajik)\b|सामाजिक/i,
+        match: (s) => /social|सामाजिक/i.test(s),
+      },
+    ];
+    for (const r of rules) {
+      if (r.re.test(normText)) {
+        const matchedSubjects = state.subjects.filter(r.match);
+        if (matchedSubjects.length) {
+          return { regex: r.re, subjects: matchedSubjects };
+        }
+      }
+    }
+    return null;
+  }
+
+  function triggerMatchesText(normText, trigger) {
+    const t = String(trigger || "").toLowerCase().trim();
+    if (!t) return false;
+    // Non-ASCII (Devanagari/regional) or multi-word / slash expressions
+    if (/[^\x00-\x7F]/.test(t) || /[\s/]/.test(t)) {
+      return normText.includes(t);
+    }
+    const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const boundaryRe = new RegExp(`(?:^|\\s|[,.;:!?()\\-])${escaped}(?:$|\\s|[,.;:!?()\\-])`, "i");
+    return boundaryRe.test(normText);
+  }
+
+  let cachedQueryKey = null;
+  let cachedQueryPlan = null;
+
+  function analyzeStudentQuery(rawQuery) {
+    const raw = String(rawQuery || "").trim();
+    const cacheKey = `${raw}||${state.subject}||${state.classLevel}`;
+    if (cacheKey === cachedQueryKey && cachedQueryPlan) {
+      return cachedQueryPlan;
+    }
+
+    const cleaned = raw
+      .toLowerCase()
+      .replace(/[।?!,;:"'“”‘’()[\]{}]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!cleaned) {
+      const emptyPlan = {
+        raw: "",
+        hasQuery: false,
+        chapterMatchSet: null,
+        expandGroups: [],
+        leftoverTokens: [],
+        bannerTitle: "",
+        suggestedChapters: [],
+      };
+      cachedQueryKey = cacheKey;
+      cachedQueryPlan = emptyPlan;
+      return emptyPlan;
+    }
+
+    let working = cleaned;
+    let parsedClass = "";
+    const clsMatch = working.match(
+      /(?:\bclass\s*(10|11|12)\b|\b(10|11|12)\s*(?:th|वीं)\b|कक्षा\s*(10|11|12))/i
+    );
+    if (clsMatch) {
+      const num = clsMatch[1] || clsMatch[2] || clsMatch[3];
+      parsedClass = `Class ${num}`;
+    }
+
+    const subjInfo = matchSubjectKeyword(working);
+    const chNumMatch = working.match(
+      /(?:^|\s)(?:ch|chap|chapter|mod|module|adhyay|अध्याय|पाठ)\s*[-:.#]?\s*0*(\d{1,2})(?:\b|$)/i
+    );
+
+    let chapterMatchSet = null;
+    let bannerTitle = "";
+    const suggestedNos = [];
+
+    if (chNumMatch) {
+      const targetNum = Number(chNumMatch[1]);
+      chapterMatchSet = new Set();
+      working = working.replace(chNumMatch[0], " ");
+      if (clsMatch) working = working.replace(clsMatch[0], " ");
+      if (subjInfo) working = working.replace(subjInfo.regex, " ");
+
+      const effectiveClass =
+        parsedClass ||
+        (state.classLevel.startsWith("Class ") ? state.classLevel : "");
+      const effectiveSubjects = subjInfo
+        ? subjInfo.subjects
+        : state.subject !== "All" && state.subject !== "Saved"
+          ? [state.subject]
+          : [];
+
+      // First try NCERT subject/class chapter index when class or subject is specified
+      for (const ch of state.syllabus) {
+        const ped = getChapterPedagogy(ch.chapter_no);
+        const subjOk =
+          !effectiveSubjects.length || effectiveSubjects.includes(ch.subject);
+        const chVideos = state.videos.filter(
+          (v) => v.chapter_no === ch.chapter_no
+        );
+        const clsOk =
+          !effectiveClass ||
+          chVideos.some((v) => v.class_level === effectiveClass);
+
+        if (effectiveSubjects.length || effectiveClass) {
+          if (subjOk && clsOk && ped.sub_idx === targetNum) {
+            chapterMatchSet.add(ch.chapter_no);
+          }
+        }
+      }
+
+      // Also include direct chapter_no match if no subject/class constraint conflicted or set was empty
+      if (
+        (!effectiveSubjects.length && !effectiveClass) ||
+        chapterMatchSet.size === 0
+      ) {
+        if (state.syllabusByNo.has(targetNum)) {
+          chapterMatchSet.add(targetNum);
+        }
+        // If user typed e.g. "ch 1" with All subjects, also surface Class 11/12 starter chapters if direct matched
+      }
+
+      for (const no of chapterMatchSet) {
+        if (!suggestedNos.includes(no)) suggestedNos.push(no);
+      }
+      if (suggestedNos.length) {
+        const firstCh = state.syllabusByNo.get(suggestedNos[0]);
+        bannerTitle = firstCh
+          ? `Matched Textbook Chapter ${pad2(targetNum)}`
+          : "";
+      }
+    }
+
+    // Synonym & Phonetic Hinglish Dictionary Lookup
+    const expandGroups = [];
+    const rules = Array.isArray(PEDAGOGY.synonyms) ? PEDAGOGY.synonyms : [];
+    for (const rule of rules) {
+      if (!Array.isArray(rule.triggers)) continue;
+      const matchedTrig = rule.triggers.find((trig) =>
+        triggerMatchesText(working, trig)
+      );
+      if (matchedTrig) {
+        expandGroups.push({
+          trigger: matchedTrig,
+          label: rule.label,
+          expand: (rule.expand || []).map((x) => x.toLowerCase()),
+        });
+        const esc = matchedTrig.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        working = working.replace(new RegExp(esc, "gi"), " ");
+      }
+    }
+
+    if (expandGroups.length) {
+      bannerTitle = expandGroups.map((g) => g.label).join(" + ");
+      for (const ch of state.syllabus) {
+        const ped = getChapterPedagogy(ch.chapter_no);
+        const chHay =
+          `${ch.chapter} ${ch.unit} ${ped.hi} ${CFG.acronyms[ch.chapter_no] || ""}`.toLowerCase();
+        if (
+          expandGroups.some((g) =>
+            g.expand.some((phrase) => chHay.includes(phrase))
+          )
+        ) {
+          if (!suggestedNos.includes(ch.chapter_no)) {
+            suggestedNos.push(ch.chapter_no);
+          }
+        }
+      }
+    }
+
+    const stopWords = new Set(["class", "chapter", "ch", "in", "ka", "ke", "ki", "aur", "and"]);
+    const leftoverTokens = working
+      .trim()
+      .split(/\s+/)
+      .filter((tok) => tok && !( (chapterMatchSet || expandGroups.length) && stopWords.has(tok) ));
+
+    const plan = {
+      raw,
+      hasQuery: true,
+      chapterMatchSet,
+      expandGroups,
+      leftoverTokens,
+      bannerTitle,
+      suggestedChapters: suggestedNos
+        .slice(0, 5)
+        .map((no) => state.syllabusByNo.get(no))
+        .filter(Boolean),
+    };
+    cachedQueryKey = cacheKey;
+    cachedQueryPlan = plan;
+    return plan;
+  }
+
   function filterVideosCustom(overrides = {}) {
     const subj = overrides.subject ?? state.subject;
     const cls = overrides.classLevel ?? state.classLevel;
@@ -486,11 +971,7 @@
     const edu = overrides.educator ?? state.educator;
     const sortKey = overrides.sort ?? state.sort;
 
-    const tokens = String(qText || "")
-      .toLowerCase()
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
+    const qPlan = qText ? analyzeStudentQuery(qText) : null;
 
     return state.videos.filter((v) => {
       if (subj === "Saved") {
@@ -503,11 +984,26 @@
       if (lang !== "all" && v.language !== lang) return false;
       if (exam !== "all" && v.target_exam !== exam) return false;
       if (edu && v.educator !== edu && v.channel !== edu) return false;
-      if (!matchesSortScope(v, sortKey)) return false;
+      if (!matchesSortScope(v, sortKey, chNo)) return false;
 
-      if (tokens.length) {
-        for (const tok of tokens) {
-          if (!v._search.includes(tok)) return false;
+      if (qPlan && qPlan.hasQuery) {
+        if (
+          qPlan.chapterMatchSet &&
+          qPlan.chapterMatchSet.size > 0 &&
+          !qPlan.chapterMatchSet.has(v.chapter_no)
+        ) {
+          return false;
+        }
+        if (qPlan.expandGroups.length > 0) {
+          for (const grp of qPlan.expandGroups) {
+            const anyPhrase = grp.expand.some((p) => v._search.includes(p));
+            if (!anyPhrase) return false;
+          }
+        }
+        if (qPlan.leftoverTokens.length > 0) {
+          for (const tok of qPlan.leftoverTokens) {
+            if (!v._search.includes(tok)) return false;
+          }
         }
       }
       return true;
@@ -516,6 +1012,78 @@
 
   function getFilteredVideos() {
     return filterVideosCustom();
+  }
+
+  /* ==========================================================================
+     STUDY TRACKER HELPERS (localStorage Persistence for Chapters & Videos)
+     ========================================================================== */
+  function toggleChapterDone(chNo) {
+    const k = String(chNo);
+    const nowDone = !state.doneChapters.has(k);
+    if (nowDone) {
+      state.doneChapters.add(k);
+    } else {
+      state.doneChapters.delete(k);
+    }
+    saveSet(DONE_KEY, state.doneChapters);
+    return nowDone;
+  }
+
+  function toggleVideoDone(v) {
+    const vKey = v._key;
+    const chKey = String(v.chapter_no);
+    const nowDone = !state.doneVideos.has(vKey);
+    if (nowDone) {
+      state.doneVideos.add(vKey);
+      // Increment chapter syllabus progress bar immediately when a chapter lecture is mastered
+      state.doneChapters.add(chKey);
+    } else {
+      state.doneVideos.delete(vKey);
+      const anyOtherDoneInCh = state.videos.some(
+        (item) =>
+          item.chapter_no === v.chapter_no && state.doneVideos.has(item._key)
+      );
+      if (!anyOtherDoneInCh) {
+        state.doneChapters.delete(chKey);
+      }
+    }
+    saveSet(DONE_VIDEOS_KEY, state.doneVideos);
+    saveSet(DONE_KEY, state.doneChapters);
+    return nowDone;
+  }
+
+  function toggleSavedVideo(v) {
+    const k = v._key;
+    if (state.saved.has(k)) state.saved.delete(k);
+    else state.saved.add(k);
+    saveSet(SAVED_KEY, state.saved);
+    return state.saved.has(k);
+  }
+
+  function jumpToChapter(chNo) {
+    const target = Number(chNo) || 0;
+    state.chapterNo = target;
+    if (target > 0) {
+      const ch = state.syllabusByNo.get(target);
+      if (
+        ch &&
+        state.subject !== "All" &&
+        state.subject !== "Saved" &&
+        state.subject !== ch.subject
+      ) {
+        state.subject = ch.subject;
+      }
+      if (state.classLevel !== "all") {
+        const chCheck = filterVideosCustom({
+          chapterNo: target,
+          classLevel: state.classLevel,
+        });
+        if (chCheck.length === 0) state.classLevel = "all";
+      }
+    }
+    state.flatLimit = FLAT_PAGE_SIZE;
+    renderAll({ announce: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   /* ==========================================================================
@@ -629,6 +1197,10 @@
     const sortParam = params.get("sort");
     const validSorts = [
       "trending",
+      "zero_to_hero",
+      "exam_tomorrow",
+      "solve_pyqs",
+      "easy_scoring",
       "chapterwise",
       "views",
       "quick_revision",
@@ -648,7 +1220,33 @@
     const roleParam = params.get("role");
     if (roleParam === "student" || roleParam === "teacher") {
       state.userRole = roleParam;
+      state.compassCollapsed = roleParam === "teacher";
     }
+  }
+
+  function buildDeepLinkUrl(overrides = {}) {
+    const base = `${window.location.origin}${window.location.pathname}`;
+    const params = new URLSearchParams();
+    const subj = overrides.subject ?? state.subject;
+    const cls = overrides.classLevel ?? state.classLevel;
+    const chNo = overrides.chapterNo ?? state.chapterNo;
+    const lang = overrides.lang ?? state.lang;
+    const exam = overrides.exam ?? state.exam;
+    const edu = overrides.educator ?? state.educator;
+    const sortKey = overrides.sort ?? state.sort;
+    const qText = overrides.query ?? state.query;
+
+    if (subj && subj !== "All" && subj !== "Saved") params.set("subject", subj);
+    if (cls && cls !== "all") params.set("class", cls);
+    if (chNo > 0) params.set("chapter", String(chNo));
+    if (lang && lang !== "all") params.set("lang", lang);
+    if (exam && exam !== "all") params.set("stream", exam);
+    if (edu) params.set("educator", edu);
+    if (sortKey && sortKey !== "trending") params.set("sort", sortKey);
+    if (qText) params.set("q", qText);
+
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
   }
 
   function syncUrlAndTitle() {
@@ -661,7 +1259,7 @@
     if (state.educator) params.set("educator", state.educator);
     if (state.sort !== "trending") params.set("sort", state.sort);
     if (state.query) params.set("q", state.query);
-    if (state.userRole === "student") params.set("role", "student");
+    if (state.userRole === "teacher") params.set("role", "teacher");
 
     const qs = params.toString();
     const nextRel = `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash || ""}`;
@@ -669,7 +1267,6 @@
       window.history.replaceState(null, "", nextRel);
     } catch {}
 
-    // Accessible dynamic page title for deep-linked views
     const titleParts = [];
     if (state.chapterNo) {
       const ch = state.syllabusByNo.get(state.chapterNo);
@@ -686,40 +1283,52 @@
   }
 
   /* ==========================================================================
-     CLASSROOM SHARE (WhatsApp + Clipboard + Toast)
+     WHATSAPP HOMEWORK & STUDY TARGET DEEP-LINK SHARE
      ========================================================================== */
   function buildCurrentViewSharePayload(overrideChapterNo = 0) {
-    const urlObj = new URL(window.location.href);
-    if (overrideChapterNo > 0) {
-      urlObj.searchParams.set("chapter", String(overrideChapterNo));
-    }
-    const shareUrl = urlObj.toString();
+    const targetChNo = overrideChapterNo || state.chapterNo;
+    const chObj = targetChNo > 0 ? state.syllabusByNo.get(targetChNo) : null;
+    const shareUrl = buildDeepLinkUrl({
+      subject: chObj ? chObj.subject : state.subject,
+      chapterNo: targetChNo,
+      lang: state.lang,
+    });
 
     const parts = [CFG.brandName];
-    const targetChNo = overrideChapterNo || state.chapterNo;
-    if (targetChNo > 0) {
-      const ch = state.syllabusByNo.get(targetChNo);
-      if (ch) parts.push(`Ch ${pad2(ch.chapter_no)} ${ch.chapter}`);
+    if (chObj) {
+      const ped = getChapterPedagogy(chObj.chapter_no);
+      const hiShort = shortHindiLabel(ped.hi);
+      parts.push(
+        `Ch ${pad2(chObj.chapter_no)} ${chObj.chapter}${hiShort ? ` (${hiShort})` : ""}`
+      );
     } else {
       if (state.subject !== "All") parts.push(state.subject);
       if (state.classLevel !== "all") parts.push(state.classLevel);
     }
     if (state.educator) parts.push(`by ${state.educator}`);
     if (state.lang !== "all") parts.push(getLangMeta(state.lang).badge);
-    if (state.exam !== "all") parts.push(state.exam);
 
     const count = overrideChapterNo
       ? filterVideosCustom({ chapterNo: overrideChapterNo }).length
       : getFilteredVideos().length;
 
-    const text = `📚 ${parts.join(" · ")} (${count.toLocaleString()} Verified Lectures): ${shareUrl}`;
+    const text = `📚 ${parts.join(" · ")} (${count.toLocaleString()} Verified Lectures)\n🔗 Study Roadmap: ${shareUrl}`;
     return { text, url: shareUrl };
   }
 
   function buildVideoShareText(v) {
     const creator = v.educator || v.channel || CFG.brandName;
     const lang = v.language ? getLangMeta(v.language).badge : "Hinglish";
-    return `📚 [Ch ${pad2(v.chapter_no)} · ${v.chapter}] — ${v.title} by ${creator} (${lang}): ${v.url}`;
+    const deepUrl = buildDeepLinkUrl({
+      subject: v.subject,
+      chapterNo: v.chapter_no,
+      lang: v.language || state.lang,
+      classLevel: "all",
+      educator: "",
+      query: "",
+      sort: "trending",
+    });
+    return `📚 [Ch ${pad2(v.chapter_no)} · ${v.chapter}] ${v._vibe.label}\n▶ ${v.title} — ${creator} (${lang})\n🎬 Watch: ${v.url}\n🧭 Chapter Roadmap: ${deepUrl}`;
   }
 
   async function copyToClipboard(str) {
@@ -745,33 +1354,582 @@
     }
   }
 
-  function showShareToast(label, fullShareText) {
+  function showShareToast(label, fullShareText, hideWhatsApp = false) {
     if (!el.shareToast) return;
     if (el.toastMsg) el.toastMsg.textContent = label;
     if (el.toastWaLink) {
-      el.toastWaLink.href = `https://wa.me/?text=${encodeURIComponent(fullShareText)}`;
+      el.toastWaLink.hidden = Boolean(hideWhatsApp);
+      if (fullShareText) {
+        el.toastWaLink.href = `https://wa.me/?text=${encodeURIComponent(fullShareText)}`;
+      }
     }
     el.shareToast.hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       if (el.shareToast) el.shareToast.hidden = true;
-    }, 5500);
+    }, 6000);
   }
 
   async function shareVideoCard(v) {
     const msg = buildVideoShareText(v);
     await copyToClipboard(msg);
-    showShareToast("✓ Homework message copied! Tap to send on WhatsApp:", msg);
+    showShareToast("✓ Study link copied! Tap WhatsApp to send:", msg);
   }
 
   /* ==========================================================================
-     RENDERING: TABS, INLINE PILLS, DYNAMIC DROPDOWNS & MOBILE PICKERS
+     ZERO-TYPING "3-TAP VISUAL COMPASS" (Language -> Situation -> Chapter)
+     ========================================================================== */
+  function renderVisualCompass() {
+    if (!el.visualCompass) return;
+
+    if (state.userRole === "teacher") {
+      el.visualCompass.hidden = true;
+      return;
+    }
+    el.visualCompass.hidden = false;
+
+    if (el.compassBody) {
+      el.compassBody.hidden = state.compassCollapsed;
+    }
+    if (el.compassToggleBtn) {
+      el.compassToggleBtn.setAttribute(
+        "aria-expanded",
+        state.compassCollapsed ? "false" : "true"
+      );
+      el.compassToggleBtn.textContent = state.compassCollapsed
+        ? "🧭 Show 3-Tap Compass ▾"
+        : "Hide Compass ▴";
+    }
+
+    if (state.compassCollapsed) return;
+
+    // TAP 1: Comfort Language (Visible Native Script Pills)
+    if (el.compassLangs) {
+      el.compassLangs.replaceChildren();
+      const pool = filterVideosCustom({ lang: "all" });
+      const counts = new Map();
+      for (const v of pool) {
+        if (v.language) {
+          counts.set(v.language, (counts.get(v.language) || 0) + 1);
+        }
+      }
+
+      const orderedLangs = state.allLanguages.slice().sort((a, b) => {
+        const ia = COMPASS_LANG_ORDER.indexOf(a);
+        const ib = COMPASS_LANG_ORDER.indexOf(b);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return (counts.get(b) || 0) - (counts.get(a) || 0);
+      });
+
+      const allBtn = document.createElement("button");
+      allBtn.type = "button";
+      allBtn.className = "compass-lang-pill";
+      allBtn.setAttribute("aria-pressed", state.lang === "all" ? "true" : "false");
+      allBtn.textContent = "🌐 All ";
+      const allCnt = document.createElement("span");
+      allCnt.className = "compass-lang-cnt";
+      allCnt.textContent = String(pool.length);
+      allBtn.appendChild(allCnt);
+      allBtn.addEventListener("click", () => {
+        state.lang = "all";
+        state.flatLimit = FLAT_PAGE_SIZE;
+        renderAll({ announce: true });
+      });
+      el.compassLangs.appendChild(allBtn);
+
+      for (const lg of orderedLangs) {
+        const meta = getLangMeta(lg);
+        const c = counts.get(lg) || 0;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "compass-lang-pill";
+        btn.dataset.lang = lg;
+        const active = state.lang === lg;
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+
+        const lbl = document.createElement("span");
+        lbl.textContent = meta.pill;
+
+        const cnt = document.createElement("span");
+        cnt.className = "compass-lang-cnt";
+        cnt.textContent = String(c);
+
+        btn.append(lbl, cnt);
+        btn.addEventListener("click", () => {
+          state.lang = state.lang === lg ? "all" : lg;
+          state.flatLimit = FLAT_PAGE_SIZE;
+          renderAll({ announce: true });
+        });
+        el.compassLangs.appendChild(btn);
+      }
+    }
+
+    // TAP 2: 4 Honest Student Situation Cards
+    if (el.compassSituations) {
+      el.compassSituations.replaceChildren();
+      for (const sit of STUDENT_SITUATIONS) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "situation-card";
+        btn.dataset.situation = sit.key;
+        const active = state.sort === sit.key;
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+
+        const title = document.createElement("span");
+        title.className = "situation-title";
+        title.textContent = sit.title;
+
+        const desc = document.createElement("span");
+        desc.className = "situation-desc";
+        desc.textContent = sit.desc;
+
+        btn.append(title, desc);
+        btn.addEventListener("click", () => {
+          state.sort = state.sort === sit.key ? "trending" : sit.key;
+          state.flatLimit = FLAT_PAGE_SIZE;
+          renderAll({ announce: true });
+        });
+        el.compassSituations.appendChild(btn);
+      }
+    }
+
+    // TAP 3: Pick Subject & Textbook Chapter (NCERT Numbers + English + Native Script)
+    const chPool = filterVideosCustom({ chapterNo: 0 });
+    const chCounts = new Map();
+    for (const v of chPool) {
+      chCounts.set(v.chapter_no, (chCounts.get(v.chapter_no) || 0) + 1);
+    }
+
+    const candidateChapters = state.syllabus.filter((ch) => {
+      if (
+        state.subject !== "All" &&
+        state.subject !== "Saved" &&
+        ch.subject !== state.subject
+      ) {
+        return false;
+      }
+      if (
+        state.classLevel !== "all" &&
+        state.classLevel !== "dropper" &&
+        state.chapterNo !== ch.chapter_no &&
+        (chCounts.get(ch.chapter_no) || 0) === 0
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    if (el.compassChapterSelect) {
+      el.compassChapterSelect.replaceChildren();
+      const defOpt = document.createElement("option");
+      defOpt.value = "0";
+      const chWord = CFG.platformId === "olympiad" ? "Module" : "Chapter";
+      defOpt.textContent = `📖 All ${candidateChapters.length} ${chWord}s — Pick Ch 01, Ch 02 (English + हिंदी)`;
+      el.compassChapterSelect.appendChild(defOpt);
+
+      for (const ch of candidateChapters) {
+        const ped = getChapterPedagogy(ch.chapter_no);
+        const roi = getRoiMeta(ped.roi);
+        const hiShort = shortHindiLabel(ped.hi);
+        const doneMark = state.doneChapters.has(String(ch.chapter_no))
+          ? "✓ "
+          : roi.isEasy
+            ? "🟢 "
+            : "";
+        const cnt = chCounts.get(ch.chapter_no) || 0;
+        const opt = document.createElement("option");
+        opt.value = String(ch.chapter_no);
+        opt.textContent = `${doneMark}Ch ${pad2(ch.chapter_no)} · ${ch.chapter}${hiShort && hiShort !== ch.chapter ? ` — ${hiShort}` : ""} (${cnt})`;
+        el.compassChapterSelect.appendChild(opt);
+      }
+      el.compassChapterSelect.value = String(state.chapterNo || 0);
+      el.compassChapterSelect.classList.toggle(
+        "is-filtered",
+        state.chapterNo > 0
+      );
+    }
+
+    if (el.compassChapters) {
+      el.compassChapters.replaceChildren();
+      // Curate quick chips: active chapter first (if any), then starter / high-ROI chapters across subjects
+      const quickList = [];
+      if (state.chapterNo > 0) {
+        const activeCh = state.syllabusByNo.get(state.chapterNo);
+        if (activeCh) quickList.push(activeCh);
+      }
+      const sortedCandidates = candidateChapters.slice().sort((a, b) => {
+        const pa = getChapterPedagogy(a.chapter_no);
+        const pb = getChapterPedagogy(b.chapter_no);
+        if (state.sort === "easy_scoring") {
+          const rDiff = getRoiMeta(pb.roi).rank - getRoiMeta(pa.roi).rank;
+          if (rDiff !== 0) return rDiff;
+        }
+        // Prefer starter chapters (prereq === 0) & early textbook chapters
+        const aStarter = pa.prereq === 0 ? 1 : 0;
+        const bStarter = pb.prereq === 0 ? 1 : 0;
+        if (bStarter !== aStarter) return bStarter - aStarter;
+        return a.chapter_no - b.chapter_no;
+      });
+      for (const ch of sortedCandidates) {
+        if (quickList.length >= 8) break;
+        if (!quickList.some((x) => x.chapter_no === ch.chapter_no)) {
+          quickList.push(ch);
+        }
+      }
+
+      for (const ch of quickList) {
+        const ped = getChapterPedagogy(ch.chapter_no);
+        const hiShort = shortHindiLabel(ped.hi);
+        const chip = document.createElement("button");
+        chip.type = "button";
+        const isCurrent = state.chapterNo === ch.chapter_no;
+        chip.className = `compass-ch-pill${isCurrent ? " is-active" : ""}`;
+        const shortEng =
+          ch.chapter.length > 24 ? `${ch.chapter.slice(0, 22)}…` : ch.chapter;
+        chip.textContent =
+          hiShort && hiShort !== ch.chapter
+            ? `Ch ${pad2(ch.chapter_no)} · ${shortEng} (${hiShort})`
+            : `Ch ${pad2(ch.chapter_no)} · ${shortEng}`;
+        chip.addEventListener("click", () => {
+          jumpToChapter(isCurrent ? 0 : ch.chapter_no);
+        });
+        el.compassChapters.appendChild(chip);
+      }
+    }
+  }
+
+  /* ==========================================================================
+     PHONETIC HINGLISH & VOICE MATCH HELPER BANNER
+     ========================================================================== */
+  function renderPhoneticBanner() {
+    if (!el.phoneticBanner) return;
+    el.phoneticBanner.replaceChildren();
+
+    if (state.voiceFallbackOpen && !state.query) {
+      el.phoneticBanner.hidden = false;
+      const msg = document.createElement("span");
+      msg.innerHTML =
+        "<strong>🎤 Quick Hinglish Topics:</strong> Tap a spoken keyword or type in the search box:";
+      el.phoneticBanner.appendChild(msg);
+
+      const sampleChips =
+        CFG.platformId === "neet"
+          ? ["Anuvanshikta", "DNA", "Koshika", "Bijli", "Prakash", "Carbon", "12th Physics Ch 1"]
+          : CFG.platformId === "olympiad"
+            ? ["Trikonmiti", "Prayikta", "Ch 1", "Number Theory", "Combinatorics"]
+            : ["Samakalan", "Avkalan", "Trikonmiti", "Bijli", "Prakash", "Carbon", "12th Physics Ch 1"];
+
+      for (const word of sampleChips) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "phonetic-jump-btn";
+        b.textContent = word;
+        b.addEventListener("click", () => {
+          state.voiceFallbackOpen = false;
+          state.query = word;
+          if (el.q) el.q.value = word;
+          syncSearchClear();
+          renderAll({ announce: true });
+        });
+        el.phoneticBanner.appendChild(b);
+      }
+      return;
+    }
+
+    if (!state.query) {
+      el.phoneticBanner.hidden = true;
+      return;
+    }
+
+    const plan = analyzeStudentQuery(state.query);
+    if (!plan.bannerTitle && !plan.suggestedChapters.length) {
+      el.phoneticBanner.hidden = true;
+      return;
+    }
+
+    el.phoneticBanner.hidden = false;
+    const lead = document.createElement("span");
+    const st = document.createElement("strong");
+    st.textContent = `💡 Smart Match: ${plan.bannerTitle || state.query}`;
+    lead.append(
+      st,
+      document.createTextNode(
+        plan.suggestedChapters.length
+          ? " — Open 1 → 2 → 3 Chapter Roadmap:"
+          : ""
+      )
+    );
+    el.phoneticBanner.appendChild(lead);
+
+    for (const ch of plan.suggestedChapters) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "phonetic-jump-btn";
+      btn.textContent = `📖 Ch ${pad2(ch.chapter_no)}: ${ch.chapter}`;
+      btn.addEventListener("click", () => {
+        state.query = "";
+        if (el.q) el.q.value = "";
+        syncSearchClear();
+        jumpToChapter(ch.chapter_no);
+      });
+      el.phoneticBanner.appendChild(btn);
+    }
+  }
+
+  /* ==========================================================================
+     THE "1 -> 2 -> 3 CHAPTER ROADMAP" & PREREQUISITE BRIDGE
+     ========================================================================== */
+  function renderChapterRoadmap() {
+    if (!el.chapterRoadmap) return;
+    if (!state.chapterNo || !state.syllabusByNo.has(state.chapterNo)) {
+      el.chapterRoadmap.hidden = true;
+      el.chapterRoadmap.replaceChildren();
+      return;
+    }
+
+    const chMeta = state.syllabusByNo.get(state.chapterNo);
+    const ped = getChapterPedagogy(state.chapterNo);
+    const roi = getRoiMeta(ped.roi);
+    const isDone = state.doneChapters.has(String(chMeta.chapter_no));
+
+    el.chapterRoadmap.hidden = false;
+    el.chapterRoadmap.replaceChildren();
+
+    // 1. Top Header: Chapter Tag + NCERT Ref + Exam Weightage/ROI Badge + Done & WhatsApp Actions
+    const top = document.createElement("div");
+    top.className = "roadmap-top";
+
+    const titleBlock = document.createElement("div");
+    titleBlock.className = "roadmap-title-block";
+
+    const badgesRow = document.createElement("div");
+    badgesRow.className = "roadmap-badges-row";
+
+    const chTag = document.createElement("span");
+    chTag.className = "roadmap-ch-tag";
+    const shortSubj = CFG.subjectMeta[chMeta.subject]?.short || chMeta.subject;
+    chTag.textContent = `Ch ${pad2(chMeta.chapter_no)} · ${shortSubj} · ${ped.ref}`;
+
+    const roiSpan = document.createElement("span");
+    roiSpan.className = `roi-badge ${roi.cls}`;
+    roiSpan.textContent = roi.label;
+
+    badgesRow.append(chTag, roiSpan);
+
+    const h2 = document.createElement("h2");
+    h2.className = "roadmap-h2";
+    h2.textContent = chMeta.chapter;
+
+    titleBlock.append(badgesRow, h2);
+    if (ped.hi && ped.hi !== chMeta.chapter) {
+      const subHi = document.createElement("p");
+      subHi.className = "roadmap-sub-hi";
+      subHi.textContent = `📘 ${ped.hi}`;
+      titleBlock.appendChild(subHi);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "roadmap-actions";
+
+    const doneBtn = document.createElement("button");
+    doneBtn.type = "button";
+    doneBtn.className = "roadmap-done-btn";
+    doneBtn.setAttribute("aria-pressed", isDone ? "true" : "false");
+    doneBtn.textContent = isDone
+      ? "✅ Understood & Completed"
+      : "☐ Mark Understood & Completed";
+    doneBtn.addEventListener("click", () => {
+      toggleChapterDone(chMeta.chapter_no);
+      renderAll({ announce: true });
+    });
+
+    const waBtn = document.createElement("button");
+    waBtn.type = "button";
+    waBtn.className = "roadmap-wa-btn";
+    waBtn.textContent = "📲 WhatsApp Chapter";
+    waBtn.addEventListener("click", async () => {
+      const payload = buildCurrentViewSharePayload(chMeta.chapter_no);
+      await copyToClipboard(payload.text);
+      showShareToast(
+        `✓ Ch ${pad2(chMeta.chapter_no)} study roadmap link copied!`,
+        payload.text
+      );
+    });
+
+    actions.append(doneBtn, waBtn);
+    top.append(titleBlock, actions);
+    el.chapterRoadmap.appendChild(top);
+
+    // 2. Prerequisite Bridge ("Know This First")
+    const prereqCh =
+      ped.prereq > 0 ? state.syllabusByNo.get(ped.prereq) : null;
+    const bridge = document.createElement("div");
+    bridge.className = `prereq-bridge${prereqCh ? "" : " is-starter"}`;
+
+    const bridgeTxt = document.createElement("span");
+    bridgeTxt.className = "prereq-text";
+    if (prereqCh) {
+      const bStrong = document.createElement("strong");
+      bStrong.textContent = "💡 Prerequisite Tip (Know This First): ";
+      bridgeTxt.append(bStrong, document.createTextNode(ped.tip));
+      bridge.appendChild(bridgeTxt);
+
+      const jumpBtn = document.createElement("button");
+      jumpBtn.type = "button";
+      jumpBtn.className = "roadmap-prereq-btn";
+      jumpBtn.textContent = `🔗 Review Ch ${pad2(prereqCh.chapter_no)}: ${prereqCh.chapter} →`;
+      jumpBtn.addEventListener("click", () => {
+        jumpToChapter(prereqCh.chapter_no);
+      });
+      bridge.appendChild(jumpBtn);
+    } else {
+      const bStrong = document.createElement("strong");
+      bStrong.textContent = "🌱 Starter Chapter (Zero Prerequisites): ";
+      bridgeTxt.append(bStrong, document.createTextNode(ped.tip));
+      bridge.appendChild(bridgeTxt);
+    }
+    el.chapterRoadmap.appendChild(bridge);
+
+    // 3. Guided 3-Step Video Sequence ("Where Should I Click First?")
+    const langPool = state.videos
+      .filter(
+        (v) =>
+          v.chapter_no === chMeta.chapter_no &&
+          (state.lang === "all" || v.language === state.lang)
+      )
+      .sort(comparePureTrend);
+    const fullChPool = state.videos
+      .filter((v) => v.chapter_no === chMeta.chapter_no)
+      .sort(comparePureTrend);
+    const sourcePool = langPool.length >= 2 ? langPool : fullChPool;
+
+    if (sourcePool.length > 0) {
+      const usedKeys = new Set();
+      const pickStep = (predicate) => {
+        let hit = langPool.find((v) => !usedKeys.has(v._key) && predicate(v));
+        if (!hit) {
+          hit = fullChPool.find((v) => !usedKeys.has(v._key) && predicate(v));
+        }
+        if (!hit) {
+          hit = sourcePool.find((v) => !usedKeys.has(v._key));
+        }
+        if (hit) usedKeys.add(hit._key);
+        return hit || null;
+      };
+
+      const step1 = pickStep(
+        (v) => v._vibe.key === "beginner" || v.provider === "playlist"
+      );
+      const step2 = pickStep(
+        (v) => v._vibe.key === "oneshot" || v._vibe.key === "recap"
+      );
+      const step3 = pickStep((v) => v._vibe.key === "pyq" || v._isPyq);
+
+      const steps = [
+        {
+          kicker: "🥇 Step 1: Understand From Scratch",
+          sub: "Best Foundational / Full Course",
+          video: step1,
+        },
+        {
+          kicker: "🥈 Step 2: Master Fast Revision",
+          sub: "Best Complete 1-Shot Lecture",
+          video: step2,
+        },
+        {
+          kicker: "🥉 Step 3: Crack Exam Questions",
+          sub: "Best PYQ & Numericals Session",
+          video: step3,
+        },
+      ].filter((s) => Boolean(s.video));
+
+      if (steps.length) {
+        const seqHead = document.createElement("p");
+        seqHead.className = "roadmap-seq-head";
+        seqHead.textContent =
+          "🧭 Where Should I Click First? Follow this 1 → 2 → 3 study order:";
+        el.chapterRoadmap.appendChild(seqHead);
+
+        const grid = document.createElement("div");
+        grid.className = "roadmap-steps-grid";
+
+        steps.forEach((st, idx) => {
+          const v = st.video;
+          const card = document.createElement("div");
+          card.className = "roadmap-step-card";
+
+          const kicker = document.createElement("span");
+          kicker.className = "step-kicker";
+          kicker.textContent = st.kicker;
+
+          const title = document.createElement("h3");
+          title.className = "step-title";
+          title.textContent = v.title;
+
+          const meta = document.createElement("span");
+          meta.className = "step-meta";
+          const lBadge = getLangMeta(v.language || "Hinglish").pill;
+          meta.textContent = `${v.educator || v.channel} · ${lBadge} · ${getDurationBadge(v)}`;
+
+          const act = document.createElement("div");
+          act.className = "step-actions";
+
+          const watchBtn = document.createElement("button");
+          watchBtn.type = "button";
+          watchBtn.className = "step-watch-btn";
+          watchBtn.textContent = `▶ Start Step ${idx + 1}`;
+          watchBtn.addEventListener("click", () => openPlayer(v));
+
+          const saveBtn = document.createElement("button");
+          saveBtn.type = "button";
+          saveBtn.className = "step-save-btn";
+          const isSaved = state.saved.has(v._key);
+          saveBtn.setAttribute("aria-pressed", isSaved ? "true" : "false");
+          saveBtn.setAttribute(
+            "aria-label",
+            `Save Step ${idx + 1} lecture for revision: ${v.title}`
+          );
+          saveBtn.textContent = isSaved ? "🔖✓" : "🔖";
+          saveBtn.addEventListener("click", () => {
+            toggleSavedVideo(v);
+            renderAll({ announce: false });
+          });
+
+          const ytLink = document.createElement("a");
+          ytLink.className = "step-yt-btn";
+          ytLink.href = v.url;
+          ytLink.target = "_blank";
+          ytLink.rel = "noopener noreferrer";
+          ytLink.textContent = "↗ YT";
+          ytLink.setAttribute("aria-label", `Open Step ${idx + 1} on YouTube`);
+
+          act.append(watchBtn, saveBtn, ytLink);
+          card.append(kicker, title, meta, act);
+          grid.appendChild(card);
+        });
+
+        el.chapterRoadmap.appendChild(grid);
+      }
+    }
+  }
+
+  /* ==========================================================================
+     RENDERING: TABS, INLINE PILLS, DYNAMIC DROPDOWNS & BILINGUAL TREES
      ========================================================================== */
   function applyStaticBrandConfig() {
     document.documentElement.dataset.platform = CFG.platformId;
     if (el.brandGlyph) el.brandGlyph.textContent = CFG.brandSymbol;
     if (el.brandName) el.brandName.textContent = CFG.brandName;
-    if (el.q && CFG.searchPlaceholder) el.q.placeholder = CFG.searchPlaceholder;
+    if (el.q) {
+      el.q.placeholder =
+        CFG.platformId === "neet"
+          ? "Type or 🎤 speak: Anuvanshikta, DNA, Bijli, Ch 1…"
+          : CFG.platformId === "olympiad"
+            ? "Type or 🎤 speak: Trikonmiti, Prayikta, Ch 1, IOQM…"
+            : "Type or 🎤 speak: Samakalan, Bijli, Ch 1, Om Sharma…";
+    }
 
     if (el.ecosystemNav && Array.isArray(CFG.ecosystem) && CFG.ecosystem.length) {
       el.ecosystemNav.replaceChildren();
@@ -787,31 +1945,6 @@
         dot.setAttribute("aria-hidden", "true");
         a.append(dot, document.createTextNode(item.name));
         el.ecosystemNav.appendChild(a);
-      }
-    }
-
-    if (el.quickProblems && Array.isArray(CFG.quickProblems)) {
-      el.quickProblems.replaceChildren();
-      for (const prob of CFG.quickProblems) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "problem-pill";
-        btn.textContent = prob.label;
-        btn.addEventListener("click", () => {
-          state.subject = prob.subject || "All";
-          state.chapterNo = prob.chapterNo || 0;
-          state.query = prob.query || "";
-          state.lang = prob.lang || "all";
-          state.exam = prob.exam || "all";
-          if (prob.mode === "oneshot") state.sort = "quick_revision";
-          else if (prob.mode === "playlists") state.sort = "playlists";
-          else if (prob.mode === "pyq") state.sort = "pyq";
-          else state.sort = "trending";
-          if (el.q) el.q.value = state.query;
-          syncSearchClear();
-          renderAll({ announce: true });
-        });
-        el.quickProblems.appendChild(btn);
       }
     }
   }
@@ -896,7 +2029,6 @@
 
       btn.addEventListener("click", () => {
         state.classLevel = def.key;
-        // On Board/UPBoard, if switching to Class 10 while a Class 12 subject is active, widen subject to All
         if (state.subject !== "All" && state.subject !== "Saved") {
           const check = filterVideosCustom({
             subject: state.subject,
@@ -923,6 +2055,7 @@
   function bindRadiogroupArrowKeys(container) {
     if (!container) return;
     container.addEventListener("keydown", (e) => {
+      if (e.isComposing || e.keyCode === 229) return;
       if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(e.key)) return;
       const radios = Array.from(container.querySelectorAll('[role="radio"]'));
       if (!radios.length) return;
@@ -939,7 +2072,6 @@
     });
   }
 
-  /* Faceted Dropdown Counts — Never Leave Teachers Guessing */
   function updateFacetedSelects() {
     // 1. Language Select
     if (el.langSelect) {
@@ -1006,7 +2138,7 @@
       el.examSelect.classList.toggle("is-filtered", state.exam !== "all");
     }
 
-    // 3. Educator / Channel Select (Directly in Row 2!)
+    // 3. Educator / Channel Select
     if (el.educatorSelect) {
       const baseEduPool = filterVideosCustom({ educator: "" });
       const counts = new Map();
@@ -1038,7 +2170,7 @@
       el.educatorSelect.classList.toggle("is-filtered", Boolean(state.educator));
     }
 
-    // 4. Sort Select
+    // 4. Sort / Study Goal Select
     if (el.sortSelect) {
       el.sortSelect.value = state.sort;
       el.sortSelect.classList.toggle("is-filtered", state.sort !== "trending");
@@ -1056,6 +2188,7 @@
       if (!container) return;
       container.replaceChildren();
       const q = (filterQuery || "").toLowerCase().trim();
+      const qPlan = q ? analyzeStudentQuery(q) : null;
 
       const visibleChapters = state.syllabus.filter((ch) => {
         if (
@@ -1074,10 +2207,23 @@
           return false;
         }
         if (!q) return true;
+        if (
+          qPlan?.chapterMatchSet &&
+          qPlan.chapterMatchSet.has(ch.chapter_no)
+        ) {
+          return true;
+        }
+        const ped = getChapterPedagogy(ch.chapter_no);
         const extra = CFG.acronyms[ch.chapter_no] || "";
         const hay =
-          `${ch.chapter_no} ${pad2(ch.chapter_no)} ${ch.chapter} ${ch.unit} ${ch.subject} ${extra}`.toLowerCase();
-        return hay.includes(q);
+          `${ch.chapter_no} ${pad2(ch.chapter_no)} ${ch.chapter} ${ped.hi} ${ped.ref} ${ch.unit} ${ch.subject} ${extra}`.toLowerCase();
+        if (hay.includes(q)) return true;
+        if (qPlan?.expandGroups?.length) {
+          return qPlan.expandGroups.some((g) =>
+            g.expand.some((p) => hay.includes(p))
+          );
+        }
+        return false;
       });
 
       if (el.railChTotal && !closeDrawerOnPick) {
@@ -1118,6 +2264,10 @@
         ul.setAttribute("role", "list");
 
         for (const ch of chapters) {
+          const ped = getChapterPedagogy(ch.chapter_no);
+          const roi = getRoiMeta(ped.roi);
+          const hiShort = shortHindiLabel(ped.hi);
+
           const li = document.createElement("li");
           const btn = document.createElement("button");
           btn.type = "button";
@@ -1128,27 +2278,41 @@
 
           const noSpan = document.createElement("span");
           noSpan.className = "ch-no";
-          noSpan.textContent =
-            state.userRole === "student" && isDone ? "✓" : pad2(ch.chapter_no);
+          noSpan.textContent = isDone ? "✓" : pad2(ch.chapter_no);
+
+          const stack = document.createElement("span");
+          stack.className = "ch-name-stack";
 
           const nameSpan = document.createElement("span");
           nameSpan.className = "ch-name";
-          nameSpan.textContent = ch.chapter;
+          if (roi.isEasy && !isDone) {
+            const dot = document.createElement("span");
+            dot.className = "ch-roi-dot";
+            dot.setAttribute("aria-hidden", "true");
+            nameSpan.appendChild(dot);
+          }
+          nameSpan.appendChild(document.createTextNode(ch.chapter));
+          stack.appendChild(nameSpan);
+
+          if (hiShort && hiShort !== ch.chapter) {
+            const subSpan = document.createElement("span");
+            subSpan.className = "ch-sub-hi";
+            subSpan.textContent = `${hiShort} · ${ped.ref}`;
+            stack.appendChild(subSpan);
+          }
 
           const cntSpan = document.createElement("span");
           cntSpan.className = "ch-cnt";
           cntSpan.textContent = String(chCounts.get(ch.chapter_no) || 0);
 
-          btn.append(noSpan, nameSpan, cntSpan);
+          btn.append(noSpan, stack, cntSpan);
           btn.addEventListener("click", () => {
-            state.chapterNo =
+            const nextNo =
               state.chapterNo === ch.chapter_no ? 0 : ch.chapter_no;
-            state.flatLimit = FLAT_PAGE_SIZE;
             if (closeDrawerOnPick && el.syllabusDialog?.open) {
               el.syllabusDialog.close();
             }
-            renderAll({ announce: true });
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            jumpToChapter(nextNo);
           });
 
           li.appendChild(btn);
@@ -1169,8 +2333,7 @@
     el.roleTeacherBtn?.setAttribute("aria-pressed", isStudent ? "false" : "true");
     el.roleStudentBtn?.setAttribute("aria-pressed", isStudent ? "true" : "false");
 
-    if (el.studentProgressBox) el.studentProgressBox.hidden = !isStudent;
-    if (el.studentShortcutsBar) el.studentShortcutsBar.hidden = !isStudent;
+    if (el.studentProgressBox) el.studentProgressBox.hidden = false;
 
     const totalChapters = state.syllabus.length || 1;
     const doneCount = state.syllabus.filter((s) =>
@@ -1183,6 +2346,9 @@
     if (el.syllabusProgress) {
       el.syllabusProgress.max = totalChapters;
       el.syllabusProgress.value = doneCount;
+    }
+    if (el.drawerStatProgress) {
+      el.drawerStatProgress.textContent = `✅ ${doneCount} / ${state.syllabus.length} Chapters Understood & Completed`;
     }
 
     if (el.cntSaved) el.cntSaved.textContent = String(state.saved.size);
@@ -1209,7 +2375,7 @@
 
     if (el.mobLangLabel) {
       el.mobLangLabel.textContent =
-        state.lang === "all" ? "Language" : state.lang;
+        state.lang === "all" ? "Language" : getLangMeta(state.lang).pill;
     }
     el.mobLangBtn?.classList.toggle("is-active", state.lang !== "all");
 
@@ -1225,7 +2391,6 @@
       el.heroStats.textContent = `${state.syllabus.length} ${chWord} · ${state.videos.length.toLocaleString()} Verified Lectures`;
     }
 
-    // Screen-reader count
     const chaptersRepresented = new Set(filtered.map((v) => v.chapter_no)).size;
     const summaryText = `${filtered.length.toLocaleString()} matching lectures across ${chaptersRepresented} chapter${chaptersRepresented === 1 ? "" : "s"}`;
     if (el.count) el.count.textContent = summaryText;
@@ -1238,7 +2403,7 @@
     const chips = [];
     if (state.subject === "Saved") {
       chips.push({
-        label: "★ Saved Deck",
+        label: "📌 My Revision List",
         clear: () => {
           state.subject = "All";
         },
@@ -1299,10 +2464,7 @@
     }
     if (state.sort !== "trending") {
       const sortLbl =
-        el.sortSelect?.selectedOptions?.[0]?.textContent?.replace(
-          /^.*?Sort:\s*/,
-          ""
-        ) || state.sort;
+        el.sortSelect?.selectedOptions?.[0]?.textContent || state.sort;
       chips.push({
         label: sortLbl,
         clear: () => {
@@ -1412,7 +2574,6 @@
 
     img.addEventListener("error", advanceOrFallback);
     img.addEventListener("load", () => {
-      // YouTube returns a 120x90 grey placeholder when a thumbnail doesn't exist
       if (img.naturalWidth > 0 && img.naturalWidth <= 120) {
         advanceOrFallback();
       }
@@ -1421,7 +2582,7 @@
   }
 
   /* ==========================================================================
-     CLASSROOM VIDEO CARD (Clean Hierarchy + Dual Action Footer + Share)
+     STUDENT & CLASSROOM VIDEO CARD (Teaching Vibe + Tracker + WhatsApp)
      ========================================================================== */
   function createVideoCard(v, opts = {}) {
     const card = document.createElement("article");
@@ -1455,7 +2616,6 @@
     veil.appendChild(circle);
     thumbBtn.appendChild(veil);
 
-    // Top Badge Bar: Language Pill in Native Script
     const topBar = document.createElement("span");
     topBar.className = "thumb-bar-top";
     const lMeta = getLangMeta(v.language || "Hinglish");
@@ -1465,7 +2625,6 @@
     topBar.appendChild(langPill);
     thumbBtn.appendChild(topBar);
 
-    // Bottom Badge Bar: Traction + Duration / Lecture Count
     const bottomBar = document.createElement("span");
     bottomBar.className = "thumb-bar-bottom";
 
@@ -1488,7 +2647,6 @@
     const body = document.createElement("div");
     body.className = "card-body";
 
-    // Chapter & Stream Tag + Bookmark Button
     const metaTop = document.createElement("div");
     metaTop.className = "card-meta-top";
 
@@ -1500,11 +2658,10 @@
     chBtn.textContent = `${shortSubj} · Ch ${pad2(v.chapter_no)} ${v.chapter}${streamTxt}`;
     chBtn.setAttribute(
       "aria-label",
-      `Filter to Chapter ${pad2(v.chapter_no)} ${v.chapter} (${shortRef(v)})`
+      `Open 1-2-3 Chapter Roadmap for Chapter ${pad2(v.chapter_no)} ${v.chapter} (${shortRef(v)})`
     );
     chBtn.addEventListener("click", () => {
-      state.chapterNo = state.chapterNo === v.chapter_no ? 0 : v.chapter_no;
-      renderAll({ announce: true });
+      jumpToChapter(state.chapterNo === v.chapter_no ? 0 : v.chapter_no);
     });
 
     const saveBtn = document.createElement("button");
@@ -1514,21 +2671,19 @@
     saveBtn.setAttribute("aria-pressed", isSaved ? "true" : "false");
     saveBtn.setAttribute(
       "aria-label",
-      `${isSaved ? "Remove saved video" : "Save video"}: ${v.title} (${shortRef(v)})`
+      `${isSaved ? "Remove from Revision List" : "Save to Revision List"}: ${v.title} (${shortRef(v)})`
     );
     saveBtn.textContent = isSaved ? "★" : "☆";
-    saveBtn.addEventListener("click", () => {
-      if (state.saved.has(v._key)) state.saved.delete(v._key);
-      else state.saved.add(v._key);
-      saveSet(SAVED_KEY, state.saved);
-      const nowSaved = state.saved.has(v._key);
-      saveBtn.setAttribute("aria-pressed", nowSaved ? "true" : "false");
-      saveBtn.textContent = nowSaved ? "★" : "☆";
-      if (el.cntSaved) el.cntSaved.textContent = String(state.saved.size);
-      if (state.subject === "Saved") renderAll({ announce: true });
-    });
 
     metaTop.append(chBtn, saveBtn);
+
+    // Human-Friendly "Teaching Vibe" Badge Row
+    const vibeRow = document.createElement("div");
+    vibeRow.className = "vibe-row";
+    const vibeBadge = document.createElement("span");
+    vibeBadge.className = `vibe-badge ${v._vibe.cls}`;
+    vibeBadge.textContent = v._vibe.label;
+    vibeRow.appendChild(vibeBadge);
 
     // Full 2-Line Readable Title
     const h3 = document.createElement("h3");
@@ -1570,7 +2725,52 @@
       eduRow.appendChild(viewsHint);
     }
 
-    // 3. Dual Action Footer + 1-Tap Homework Share
+    // Distraction-Free Study Tracker Strip (Understood & Completed + Save for Revision)
+    const trackerRow = document.createElement("div");
+    trackerRow.className = "card-tracker-row";
+
+    const doneCardBtn = document.createElement("button");
+    doneCardBtn.type = "button";
+    doneCardBtn.className = "card-done-btn";
+    const isVidDone = state.doneVideos.has(v._key);
+    doneCardBtn.setAttribute("aria-pressed", isVidDone ? "true" : "false");
+    doneCardBtn.setAttribute(
+      "aria-label",
+      `Mark lecture understood and completed: ${v.title} (${shortRef(v)})`
+    );
+    doneCardBtn.textContent = isVidDone ? "✅ Completed" : "✅ Understood";
+    doneCardBtn.addEventListener("click", () => {
+      toggleVideoDone(v);
+      renderAll({ announce: false });
+    });
+
+    const reviseBtn = document.createElement("button");
+    reviseBtn.type = "button";
+    reviseBtn.className = "card-revise-btn";
+    reviseBtn.setAttribute("aria-pressed", isSaved ? "true" : "false");
+    reviseBtn.setAttribute(
+      "aria-label",
+      `Save lecture for revision before exam: ${v.title} (${shortRef(v)})`
+    );
+    reviseBtn.textContent = isSaved ? "🔖 In Revision" : "🔖 Save Revision";
+
+    const handleSaveToggle = () => {
+      const nowSaved = toggleSavedVideo(v);
+      saveBtn.setAttribute("aria-pressed", nowSaved ? "true" : "false");
+      saveBtn.textContent = nowSaved ? "★" : "☆";
+      reviseBtn.setAttribute("aria-pressed", nowSaved ? "true" : "false");
+      reviseBtn.textContent = nowSaved ? "🔖 In Revision" : "🔖 Save Revision";
+      if (el.cntSaved) el.cntSaved.textContent = String(state.saved.size);
+      if (state.subject === "Saved" || state.chapterNo > 0) {
+        renderAll({ announce: false });
+      }
+    };
+    saveBtn.addEventListener("click", handleSaveToggle);
+    reviseBtn.addEventListener("click", handleSaveToggle);
+
+    trackerRow.append(doneCardBtn, reviseBtn);
+
+    // Dual Action Footer + 1-Tap WhatsApp Share
     const footer = document.createElement("div");
     footer.className = "card-actions-footer";
 
@@ -1601,13 +2801,13 @@
     shareBtn.textContent = "📲";
     shareBtn.setAttribute(
       "aria-label",
-      `Share lecture on WhatsApp or copy link: ${v.title} (${shortRef(v)})`
+      `Send lecture on WhatsApp or copy link: ${v.title} (${shortRef(v)})`
     );
     shareBtn.addEventListener("click", () => shareVideoCard(v));
 
     footer.append(watchBtn, ytLink, shareBtn);
 
-    body.append(metaTop, h3, eduRow, footer);
+    body.append(metaTop, vibeRow, h3, eduRow, trackerRow, footer);
     card.append(media, body);
     return card;
   }
@@ -1626,9 +2826,9 @@
     actions.className = "recovery-actions";
 
     if (state.subject === "Saved") {
-      h2.textContent = "Your Saved Deck is currently empty";
+      h2.textContent = "📌 Your Exam Revision List is currently empty";
       p.textContent =
-        "Tap ☆ on any lecture or playlist card to bookmark videos for upcoming classes or revision.";
+        "Tap “🔖 Save Revision” on any lecture card or 1-2-3 Chapter Roadmap step to build your personal exam-week playlist offline — zero login needed.";
       const allBtn = document.createElement("button");
       allBtn.type = "button";
       allBtn.className = "primary-btn";
@@ -1645,7 +2845,6 @@
 
     h2.textContent = "No lectures matched all active filters simultaneously";
 
-    // Compute smart relaxations
     const withoutLang =
       state.lang !== "all" ? filterVideosCustom({ lang: "all" }) : [];
     const withoutEducator = state.educator
@@ -1679,7 +2878,7 @@
       actions.appendChild(langFixBtn);
     } else {
       p.textContent =
-        "Pick one of the 1-click recovery suggestions below to immediately view available lectures:";
+        "Pick one of the 1-tap recovery buttons below to immediately view available lectures:";
     }
 
     if (withoutEducator.length > 0) {
@@ -1709,8 +2908,8 @@
     if (withoutSort.length > 0) {
       const sBtn = document.createElement("button");
       sBtn.type = "button";
-      sBtn.className = "secondary-btn";
-      sBtn.textContent = `🔥 Show All Formats (${withoutSort.length})`;
+      sBtn.className = actions.children.length ? "secondary-btn" : "primary-btn";
+      sBtn.textContent = `🔥 Show All Lecture Formats (${withoutSort.length})`;
       sBtn.addEventListener("click", () => {
         state.sort = "trending";
         renderAll({ announce: true });
@@ -1744,7 +2943,7 @@
   }
 
   /* ==========================================================================
-     MAIN VIDEO STREAM (Chapterwise & Most Viewed Leaderboard)
+     MAIN VIDEO STREAM (Chapterwise & Goal-Sorted Shelves)
      ========================================================================== */
   function renderMainStream(filtered) {
     if (!el.list) return;
@@ -1790,7 +2989,6 @@
       return;
     }
 
-    // Group by Chapter
     const grouped = new Map();
     for (const v of filtered) {
       if (!grouped.has(v.chapter_no)) grouped.set(v.chapter_no, []);
@@ -1799,7 +2997,7 @@
 
     const chapterEntries = [];
     for (const [chNo, items] of grouped.entries()) {
-      items.sort(comparePureTrend);
+      items.sort((a, b) => compareItems(a, b, state.sort));
       const chMeta = state.syllabusByNo.get(chNo) || {
         chapter_no: chNo,
         chapter: items[0].chapter,
@@ -1807,13 +3005,22 @@
         unit: items[0].unit,
         weightage: items[0].weightage,
       };
+      const ped = getChapterPedagogy(chNo);
+      const roi = getRoiMeta(ped.roi);
       const peakTrend =
         Number(items[0]?._rankTrend ?? items[0]?.trend_score) || 0;
-      chapterEntries.push({ chNo, chMeta, items, peakTrend });
+      chapterEntries.push({ chNo, chMeta, ped, roi, items, peakTrend });
     }
 
     if (state.sort === "chapterwise") {
       chapterEntries.sort((a, b) => a.chNo - b.chNo);
+    } else if (state.sort === "easy_scoring") {
+      chapterEntries.sort(
+        (a, b) =>
+          b.roi.rank - a.roi.rank ||
+          b.peakTrend - a.peakTrend ||
+          a.chNo - b.chNo
+      );
     } else {
       chapterEntries.sort(
         (a, b) => b.peakTrend - a.peakTrend || a.chNo - b.chNo
@@ -1822,9 +3029,8 @@
 
     el.list.replaceChildren();
     const frag = document.createDocumentFragment();
-    const isStudent = state.userRole === "student";
 
-    chapterEntries.forEach(({ chNo, chMeta, items }, secIdx) => {
+    chapterEntries.forEach(({ chNo, chMeta, ped, roi, items }, secIdx) => {
       const section = document.createElement("section");
       section.className = `chapter-section${secIdx >= 3 ? " is-deferred" : ""}`;
       section.id = `chapter-${chNo}`;
@@ -1847,55 +3053,71 @@
 
       titleCluster.append(chPill, h2);
 
-      if (chMeta.weightage === "Very High" || chMeta.weightage === "High") {
-        const wt = document.createElement("span");
-        wt.className = "weight-tag";
-        wt.textContent = `${chMeta.weightage} Yield`;
-        titleCluster.appendChild(wt);
+      const hiShort = shortHindiLabel(ped.hi);
+      if (hiShort && hiShort !== chMeta.chapter) {
+        const subHi = document.createElement("span");
+        subHi.className = "chapter-sub-hi";
+        subHi.textContent = `(${hiShort})`;
+        titleCluster.appendChild(subHi);
       }
+
+      const roiChip = document.createElement("span");
+      roiChip.className = `roi-badge ${roi.cls}`;
+      roiChip.textContent = roi.shortTag;
+      titleCluster.appendChild(roiChip);
 
       const actionsCluster = document.createElement("div");
       actionsCluster.className = "chapter-actions-cluster";
 
-      // 1-Tap Share Chapter Button for Teachers
+      // 1-Tap Open Roadmap Button when viewing multi-chapter stream
+      if (!state.chapterNo) {
+        const roadmapBtn = document.createElement("button");
+        roadmapBtn.type = "button";
+        roadmapBtn.className = "expand-ch-btn";
+        roadmapBtn.textContent = "🧭 1-2-3 Guide";
+        roadmapBtn.setAttribute(
+          "aria-label",
+          `Open 1-2-3 Chapter Roadmap for Chapter ${pad2(chNo)} ${chMeta.chapter}`
+        );
+        roadmapBtn.addEventListener("click", () => jumpToChapter(chNo));
+        actionsCluster.appendChild(roadmapBtn);
+      }
+
+      // Always-available Chapter Completed Toggle
+      const doneBtn = document.createElement("button");
+      doneBtn.type = "button";
+      doneBtn.className = "done-chip";
+      const isDone = state.doneChapters.has(String(chNo));
+      doneBtn.setAttribute("aria-pressed", isDone ? "true" : "false");
+      doneBtn.setAttribute(
+        "aria-label",
+        `${isDone ? "Mark chapter incomplete" : "Mark chapter understood and completed"}: Chapter ${pad2(chNo)} ${chMeta.chapter}`
+      );
+      doneBtn.textContent = isDone ? "✅ Completed" : "✅ Understood";
+      doneBtn.addEventListener("click", () => {
+        toggleChapterDone(chNo);
+        renderAll({ announce: false });
+      });
+      actionsCluster.appendChild(doneBtn);
+
+      // 1-Tap WhatsApp Chapter Deep-Link
       const chShareBtn = document.createElement("button");
       chShareBtn.type = "button";
       chShareBtn.className = "ch-share-btn";
-      chShareBtn.textContent = "📲 Share Ch";
+      chShareBtn.textContent = "📲 WhatsApp";
       chShareBtn.setAttribute(
         "aria-label",
-        `Share Chapter ${pad2(chNo)} ${chMeta.chapter} view`
+        `Share Chapter ${pad2(chNo)} ${chMeta.chapter} study link on WhatsApp`
       );
       chShareBtn.addEventListener("click", async () => {
         const payload = buildCurrentViewSharePayload(chNo);
         await copyToClipboard(payload.text);
         showShareToast(
-          `✓ Ch ${pad2(chNo)} classroom link copied!`,
+          `✓ Ch ${pad2(chNo)} WhatsApp study link copied!`,
           payload.text
         );
       });
       actionsCluster.appendChild(chShareBtn);
-
-      if (isStudent) {
-        const doneBtn = document.createElement("button");
-        doneBtn.type = "button";
-        doneBtn.className = "done-chip";
-        const isDone = state.doneChapters.has(String(chNo));
-        doneBtn.setAttribute("aria-pressed", isDone ? "true" : "false");
-        doneBtn.setAttribute(
-          "aria-label",
-          `${isDone ? "Mark chapter incomplete" : "Mark chapter mastered"}: Chapter ${pad2(chNo)} ${chMeta.chapter}`
-        );
-        doneBtn.textContent = isDone ? "✓ Mastered" : "Mark Done";
-        doneBtn.addEventListener("click", () => {
-          const k = String(chNo);
-          if (state.doneChapters.has(k)) state.doneChapters.delete(k);
-          else state.doneChapters.add(k);
-          saveSet(DONE_KEY, state.doneChapters);
-          renderAll({ announce: false });
-        });
-        actionsCluster.appendChild(doneBtn);
-      }
 
       const isIsolated =
         state.chapterNo === chNo ||
@@ -1917,9 +3139,7 @@
         expBtn.className = "expand-ch-btn";
         const expanded = state.expandedChapters.has(chNo);
         expBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
-        expBtn.textContent = expanded
-          ? "Top 4"
-          : `All ${items.length} →`;
+        expBtn.textContent = expanded ? "Top 4" : `All ${items.length} →`;
         expBtn.setAttribute(
           "aria-label",
           expanded
@@ -1959,8 +3179,11 @@
     renderSubjectTabs();
     renderClassPills();
     updateFacetedSelects();
+    renderVisualCompass();
+    renderPhoneticBanner();
     updateChromeAndCounters(filtered);
     renderActiveFilterPills(filtered);
+    renderChapterRoadmap();
     renderSyllabusTrees();
     renderMainStream(filtered);
 
@@ -1981,6 +3204,7 @@
     state.exam = "all";
     state.educator = "";
     state.sort = "trending";
+    state.voiceFallbackOpen = false;
     state.flatLimit = FLAT_PAGE_SIZE;
     if (el.q) el.q.value = "";
     syncSearchClear();
@@ -1990,6 +3214,13 @@
   /* ==========================================================================
      INLINE CLASSROOM PLAYER (referrerpolicy="strict-origin-when-cross-origin")
      ========================================================================== */
+  function syncPlayerDoneButton() {
+    if (!el.playerDoneBtn || !state.activePlayerVideo) return;
+    const isDone = state.doneVideos.has(state.activePlayerVideo._key);
+    el.playerDoneBtn.setAttribute("aria-pressed", isDone ? "true" : "false");
+    el.playerDoneBtn.textContent = isDone ? "✅ Completed!" : "✅ Mark Done";
+  }
+
   function openPlayer(v) {
     if (!el.playerDialog) {
       window.open(v.url, "_blank", "noopener,noreferrer");
@@ -1997,6 +3228,8 @@
     }
 
     state.activePlayerVideo = v;
+    syncPlayerDoneButton();
+
     const embedId =
       v.embed_video_id || (v.provider === "youtube" ? v.video_id : "");
 
@@ -2028,8 +3261,7 @@
   }
 
   function mountIframe(src, v) {
-    const pill = getTractionPill(v);
-    if (el.playerBadge) el.playerBadge.textContent = pill.text;
+    if (el.playerBadge) el.playerBadge.textContent = v._vibe.label;
     if (el.playerChannel) {
       el.playerChannel.textContent = `${v.educator || v.channel} · Ch ${pad2(v.chapter_no)} ${v.chapter}`;
     }
@@ -2093,7 +3325,7 @@
     if (el.pickerSearch) el.pickerSearch.value = "";
 
     if (kind === "lang") {
-      if (el.pickerTitle) el.pickerTitle.textContent = "🌐 Select Language Medium";
+      if (el.pickerTitle) el.pickerTitle.textContent = "🌐 Select Comfort Language";
       if (el.pickerSearchWrap) {
         el.pickerSearchWrap.hidden = state.allLanguages.length <= 5;
       }
@@ -2166,7 +3398,6 @@
       return;
     }
 
-    // Educator Picker
     const basePool = filterVideosCustom({ educator: "" });
     const counts = new Map();
     for (const v of basePool) {
@@ -2212,7 +3443,102 @@
   }
 
   /* ==========================================================================
-     THEME TOGGLE, LIGHT-DISMISS FALLBACK & EVENT BINDINGS
+     1-TAP MICROPHONE VOICE SEARCH (hi-IN / en-IN / Regional SpeechRecognition)
+     ========================================================================== */
+  function setVoiceUiState(listening) {
+    state.isListening = listening;
+    if (!el.voiceSearchBtn) return;
+    el.voiceSearchBtn.classList.toggle("is-listening", listening);
+    el.voiceSearchBtn.setAttribute("aria-pressed", listening ? "true" : "false");
+    const txt = el.voiceSearchBtn.querySelector(".voice-btn-txt");
+    if (txt) txt.textContent = listening ? "Listening…" : "Speak";
+  }
+
+  function initVoiceSearch() {
+    if (!el.voiceSearchBtn) return;
+    const SpeechRec =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    el.voiceSearchBtn.addEventListener("click", () => {
+      if (!SpeechRec) {
+        state.voiceFallbackOpen = !state.voiceFallbackOpen;
+        renderPhoneticBanner();
+        el.q?.focus();
+        showShareToast(
+          "🎤 Voice input isn't active in this browser — tap any Hinglish topic chip or type directly!",
+          "",
+          true
+        );
+        return;
+      }
+
+      if (state.isListening && speechRecognizer) {
+        try {
+          speechRecognizer.stop();
+        } catch {}
+        setVoiceUiState(false);
+        return;
+      }
+
+      try {
+        const rec = new SpeechRec();
+        speechRecognizer = rec;
+        const speechLocale =
+          state.lang !== "all"
+            ? getLangMeta(state.lang).speech
+            : CFG.platformId === "upboard"
+              ? "hi-IN"
+              : "en-IN";
+        rec.lang = speechLocale || "hi-IN";
+        rec.interimResults = true;
+        rec.maxAlternatives = 1;
+
+        rec.onstart = () => {
+          setVoiceUiState(true);
+          showShareToast(
+            `🎤 Listening (${rec.lang})… Say e.g. “Class 12 Physics Chapter 1” or “Samakalan”`,
+            "",
+            true
+          );
+        };
+
+        rec.onresult = (event) => {
+          let transcript = "";
+          for (let i = 0; i < event.results.length; i += 1) {
+            transcript += event.results[i][0].transcript;
+          }
+          const cleanSpeech = transcript.replace(/[.।?!]+$/g, "").trim();
+          if (cleanSpeech) {
+            state.voiceFallbackOpen = false;
+            state.query = cleanSpeech;
+            if (el.q) el.q.value = cleanSpeech;
+            syncSearchClear();
+            state.flatLimit = FLAT_PAGE_SIZE;
+            renderAll({ announce: true });
+          }
+        };
+
+        rec.onerror = () => {
+          setVoiceUiState(false);
+          state.voiceFallbackOpen = true;
+          renderPhoneticBanner();
+        };
+
+        rec.onend = () => {
+          setVoiceUiState(false);
+        };
+
+        rec.start();
+      } catch {
+        setVoiceUiState(false);
+        state.voiceFallbackOpen = true;
+        renderPhoneticBanner();
+      }
+    });
+  }
+
+  /* ==========================================================================
+     THEME TOGGLE, LIGHT-DISMISS FALLBACK & IME-SAFE EVENT BINDINGS
      ========================================================================== */
   function initThemeToggle() {
     const syncMetaFromStorage = () => {
@@ -2276,6 +3602,7 @@
 
   function setRole(role) {
     state.userRole = role === "student" ? "student" : "teacher";
+    state.compassCollapsed = state.userRole === "teacher";
     try {
       localStorage.setItem(ROLE_KEY, state.userRole);
     } catch {}
@@ -2283,15 +3610,25 @@
   }
 
   function bindEvents() {
-    // Teacher / Student Mode Toggle
     el.roleTeacherBtn?.addEventListener("click", () => setRole("teacher"));
     el.roleStudentBtn?.addEventListener("click", () => setRole("student"));
+
+    // 3-Tap Visual Compass Collapse/Expand + Tap 3 Chapter Select
+    el.compassToggleBtn?.addEventListener("click", () => {
+      state.compassCollapsed = !state.compassCollapsed;
+      renderVisualCompass();
+    });
+
+    el.compassChapterSelect?.addEventListener("change", () => {
+      const chVal = Number(el.compassChapterSelect.value) || 0;
+      jumpToChapter(chVal);
+    });
 
     // 1-Click Share Current Filtered View (Desktop Topbar)
     el.shareCopyBtn?.addEventListener("click", async () => {
       const payload = buildCurrentViewSharePayload();
       await copyToClipboard(payload.text);
-      showShareToast("✓ Filtered classroom view copied!", payload.text);
+      showShareToast("✓ Filtered study link copied!", payload.text);
     });
 
     el.shareWhatsappBtn?.addEventListener("click", async () => {
@@ -2305,27 +3642,41 @@
       );
     });
 
-    // Saved Deck
+    // My Revision List Tab
     el.savedDeckBtn?.addEventListener("click", () => {
       state.subject = state.subject === "Saved" ? "All" : "Saved";
       renderAll({ announce: true });
     });
 
-    // Instant Search (#q)
+    // Instant Search (#q) + IME-Safe Enter Handling
     let searchTimer = null;
     el.q?.addEventListener("input", () => {
       syncSearchClear();
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => {
+        state.voiceFallbackOpen = false;
         state.query = el.q.value.trim();
         state.flatLimit = FLAT_PAGE_SIZE;
         renderAll({ announce: true });
-      }, 75);
+      }, 60);
+    });
+
+    el.q?.addEventListener("keydown", (e) => {
+      if (e.isComposing || e.keyCode === 229) return;
+      if (e.key === "Enter") {
+        e.preventDefault();
+        clearTimeout(searchTimer);
+        state.voiceFallbackOpen = false;
+        state.query = el.q.value.trim();
+        state.flatLimit = FLAT_PAGE_SIZE;
+        renderAll({ announce: true });
+      }
     });
 
     el.clearQ?.addEventListener("click", () => {
       if (el.q) el.q.value = "";
       state.query = "";
+      state.voiceFallbackOpen = false;
       syncSearchClear();
       renderAll({ announce: true });
       el.q?.focus();
@@ -2413,14 +3764,21 @@
       const payload = buildCurrentViewSharePayload();
       await copyToClipboard(payload.text);
       el.shareDialog?.close();
-      showShareToast("✓ Filtered classroom link copied!", payload.text);
+      showShareToast("✓ Filtered study link copied!", payload.text);
     });
 
     el.pickerSearch?.addEventListener("input", () => {
       renderMobilePickerOptions();
     });
 
-    // Player Modal Share & Cleanup
+    // Player Modal Completed Toggle, Share & Cleanup
+    el.playerDoneBtn?.addEventListener("click", () => {
+      if (!state.activePlayerVideo) return;
+      toggleVideoDone(state.activePlayerVideo);
+      syncPlayerDoneButton();
+      renderAll({ announce: false });
+    });
+
     el.playerShareBtn?.addEventListener("click", () => {
       if (state.activePlayerVideo) shareVideoCard(state.activePlayerVideo);
     });
@@ -2455,6 +3813,7 @@
     applyStaticBrandConfig();
     initThemeToggle();
     initLightDismissFallback();
+    initVoiceSearch();
     bindEvents();
 
     try {
@@ -2473,7 +3832,6 @@
       state.videos = Array.isArray(payload.videos) ? payload.videos : [];
       state.videos.forEach(indexRecord);
 
-      // Canonical global lists for URL hydration & faceted dropdowns
       const langTotals = new Map();
       const examTotals = new Map();
       const eduTotals = new Map();

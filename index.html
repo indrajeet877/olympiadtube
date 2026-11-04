@@ -13,10 +13,10 @@
   <title>OlympiadTube — Classroom IMO, IOQM, RMO, INMO, AIME, AMC, EGMO, NSEP &amp; INOI Video Studio</title>
   <meta name="description" content="Zero-noise 44-module Olympiad video studio covering IMO, IOQM, RMO, INMO, EGMO, AMC 8/10/12, AIME, ISI/CMI, NMTC, NTSE, NSEP/INPhO, NSEC/INChO, NSEB/INBO, NSEA/IOAA, NSEJS/IJSO & ZCO/INOI across all Indian languages.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236d28d9'/%3E%3Ctext x='16' y='21.5' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='800' font-size='12' fill='%23ffffff'%3EOLY%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=3.0">
+  <link rel="stylesheet" href="styles.css?v=4.0">
 </head>
 <body>
-  <a class="skip-link visually-hidden" href="#main-content">Skip to video lectures</a>
+  <a class="skip-link visually-hidden" href="#main-content">Skip to guided finder &amp; video lectures</a>
 
   <!-- Sleek Single-Line Compact Utility Bar (<= 48px on Desktop) -->
   <header class="site-chrome">
@@ -49,15 +49,21 @@
 
       <div class="topbar-actions">
         <div class="role-toggle" role="group" aria-label="View mode">
-          <button type="button" id="role-teacher-btn" class="role-btn" aria-pressed="true">
-            <span aria-hidden="true">👩‍🏫</span>
-            <span>Teacher</span>
-          </button>
-          <button type="button" id="role-student-btn" class="role-btn" aria-pressed="false">
+          <button type="button" id="role-student-btn" class="role-btn" aria-pressed="true">
             <span aria-hidden="true">🎓</span>
             <span>Student</span>
           </button>
+          <button type="button" id="role-teacher-btn" class="role-btn" aria-pressed="false">
+            <span aria-hidden="true">👩‍🏫</span>
+            <span>Teacher</span>
+          </button>
         </div>
+
+        <button type="button" id="saved-deck-btn" class="utility-pill is-revision-list" aria-pressed="false" aria-label="My Revision List">
+          <span aria-hidden="true">📌</span>
+          <span class="revision-btn-label">Revision List</span>
+          <span class="pill-counter" id="cnt-saved">0</span>
+        </button>
 
         <button type="button" id="share-whatsapp-btn" class="share-view-btn is-whatsapp" aria-label="Share current filtered view on WhatsApp">
           <span aria-hidden="true">📲</span>
@@ -67,11 +73,6 @@
         <button type="button" id="share-copy-btn" class="share-view-btn" aria-label="Copy link to current filtered view">
           <span aria-hidden="true">🔗</span>
           <span class="share-btn-text">Copy Link</span>
-        </button>
-
-        <button type="button" id="saved-deck-btn" class="utility-pill" aria-pressed="false" aria-label="Saved videos">
-          <span aria-hidden="true">★</span>
-          <span class="pill-counter" id="cnt-saved">0</span>
         </button>
 
         <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle light or dark theme">
@@ -93,17 +94,17 @@
 
   <p id="subline" class="subline-alert" role="alert" hidden></p>
 
-  <!-- Zero-Popup 2-Tier Sticky Filter Bar -->
+  <!-- Zero-Popup 2-Tier Sticky Filter Bar + 1-Tap Voice & Phonetic Search -->
   <div class="filter-bar-wrap">
     <div class="filter-bar">
-      <!-- Row 1: Subject Tabs + Inline Class/Level Pills + Instant Search (#q) -->
+      <!-- Row 1: Subject Tabs + Inline Class/Level Pills + Voice & Phonetic Instant Search (#q) -->
       <div class="filter-row-primary">
         <div class="subject-pills" id="subject-tabs" role="radiogroup" aria-label="Filter by subject"></div>
 
         <div class="class-pills" id="class-pills" role="radiogroup" aria-label="Filter by class or level"></div>
 
-        <search class="inline-search-wrap" aria-label="Filter by chapter, topic, or teacher">
-          <label class="visually-hidden" for="q">Search chapter, topic, or teacher name</label>
+        <search class="inline-search-wrap" aria-label="Search by English, Hindi, phonetic Hinglish, or voice">
+          <label class="visually-hidden" for="q">Search chapter, Hinglish keyword, or teacher name</label>
           <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.3-4.3"/>
@@ -112,7 +113,7 @@
             id="q"
             name="q"
             type="search"
-            placeholder="Search chapter, topic, or teacher (Om Sharma, Mohit Tyagi)…"
+            placeholder="Type or 🎤 speak: Samakalan, Bijli, Ch 1, Om Sharma…"
             enterkeyhint="search"
             autocorrect="off"
             autocapitalize="off"
@@ -120,6 +121,10 @@
           >
           <kbd id="key-hint" class="key-hint" aria-hidden="true">/</kbd>
           <button type="button" id="clear-q" class="clear-btn" hidden aria-label="Clear search query">✕</button>
+          <button type="button" id="voice-search-btn" class="voice-btn" aria-pressed="false" aria-label="Speak chapter or topic in Hindi or English">
+            <span aria-hidden="true">🎤</span>
+            <span class="voice-btn-txt">Speak</span>
+          </button>
         </search>
       </div>
 
@@ -147,62 +152,110 @@
         </div>
 
         <div class="select-cell">
-          <label class="visually-hidden" for="sort-select">Sort videos by</label>
+          <label class="visually-hidden" for="sort-select">Study goal or sort order</label>
           <select id="sort-select" name="sort" class="bar-select">
-            <option value="trending">🔥 Sort: Trending Velocity</option>
-            <option value="chapterwise">📖 Sort: Syllabus Order (Ch 01 → End)</option>
-            <option value="views">⭐ Sort: Most Viewed</option>
-            <option value="quick_revision">⚡ Sort: Quick Revision (1-Shot)</option>
-            <option value="playlists">📚 Sort: Full Playlists</option>
-            <option value="pyq">🎯 Sort: PYQ &amp; Problem Solving</option>
+            <option value="trending">🔥 Trending Best Lectures</option>
+            <option value="zero_to_hero">🌱 Start From Zero (Basic → Full)</option>
+            <option value="exam_tomorrow">⚡ Exam Tomorrow (1-Shot Revision)</option>
+            <option value="solve_pyqs">🎯 Solve Exam Questions (PYQs)</option>
+            <option value="easy_scoring">🏆 Easy High-Scoring Chapters First</option>
+            <option value="chapterwise">📖 Syllabus Order (Ch 01 → End)</option>
+            <option value="views">⭐ Most Viewed All-Time</option>
+            <option value="playlists">📚 Full Playlists Only</option>
+            <option value="quick_revision">🚀 Quick Revision &amp; Recaps</option>
+            <option value="pyq">📝 PYQ &amp; Mock Sessions</option>
           </select>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Workspace: 280px Syllabus Sidebar + Immediate Video Cards -->
+  <!-- Main Workspace: 280px Bilingual Syllabus Sidebar + Guided Discovery Stream -->
   <div class="workspace">
-    <aside class="chapter-rail" aria-label="Syllabus chapter navigator">
+    <aside class="chapter-rail" aria-label="Syllabus chapter navigator and progress tracker">
       <div class="rail-header">
         <div class="rail-title-row">
           <h2 class="rail-heading">Syllabus (<span id="rail-ch-total">44</span>)</h2>
           <button type="button" id="clear-chapter-btn" class="rail-reset-btn" hidden>All chapters</button>
         </div>
 
-        <div class="rail-progress-wrap" id="student-progress-box" hidden>
+        <!-- Always-Visible Study Progress Bar (localStorage Persistence) -->
+        <div class="rail-progress-wrap" id="student-progress-box">
           <label class="rail-progress-label" for="syllabus-progress">
-            <span>Chapters Mastered</span>
+            <span>✅ Understood &amp; Completed</span>
             <strong id="stat-progress">0 / 44</strong>
           </label>
           <progress id="syllabus-progress" class="syllabus-progress" value="0" max="44"></progress>
         </div>
 
         <div class="rail-search-box">
-          <label class="visually-hidden" for="ch-filter">Filter chapters</label>
-          <input id="ch-filter" name="ch_filter" type="search" class="rail-input" placeholder="Find chapter (01, GOC, Optics)…" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <label class="visually-hidden" for="ch-filter">Filter chapters in English or Hindi</label>
+          <input id="ch-filter" name="ch_filter" type="search" class="rail-input" placeholder="Find Ch 01, Samakalan, Bijli, GOC…" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
       </div>
 
-      <nav id="syllabus-tree" class="syllabus-tree" aria-label="Chapters grouped by unit"></nav>
+      <nav id="syllabus-tree" class="syllabus-tree" aria-label="Chapters grouped by unit with Hindi and NCERT labels"></nav>
     </aside>
 
     <main id="main-content" class="stream-column" tabindex="-1">
       <p id="live-status" class="visually-hidden" aria-live="polite"></p>
       <p id="count" class="visually-hidden">Loading verified video lectures…</p>
 
-      <!-- Student Quick Topic Shortcuts (visible in Student Mode) -->
-      <div id="student-shortcuts-bar" class="student-shortcuts-bar" hidden>
-        <div class="quick-problems-row" id="quick-problems"></div>
-      </div>
+      <!-- 1. ZERO-TYPING "3-TAP VISUAL COMPASS" DIRECTLY ABOVE VIDEO GRID -->
+      <section id="visual-compass" class="visual-compass" aria-labelledby="compass-heading">
+        <div class="compass-head">
+          <div class="compass-title-wrap">
+            <h2 id="compass-heading" class="compass-heading">🧭 Don't know what to search? Find your exact video in 3 taps:</h2>
+          </div>
+          <button type="button" id="compass-toggle-btn" class="compass-toggle-btn" aria-expanded="true" aria-controls="compass-body">
+            Hide Compass ▴
+          </button>
+        </div>
 
-      <!-- Active Filter Bar (only rendered when filters are active so zero space is wasted by default) -->
+        <div id="compass-body" class="compass-body">
+          <!-- Tap 1: Comfort Language (Visible Native Script Pills) -->
+          <div class="compass-step">
+            <span class="compass-step-badge">Tap 1 · Comfort Language</span>
+            <div id="compass-langs" class="compass-lang-strip" role="group" aria-label="Choose your comfort language"></div>
+          </div>
+
+          <!-- Tap 2: Honest Student Situations ("How Can We Help You Today?") -->
+          <div class="compass-step">
+            <span class="compass-step-badge">Tap 2 · How Can We Help Today?</span>
+            <div id="compass-situations" class="situation-grid" role="group" aria-label="Choose your current study situation"></div>
+          </div>
+
+          <!-- Tap 3: Pick Subject & Chapter (NCERT Numbers + English + Native Script) -->
+          <div class="compass-step">
+            <div class="compass-step3-bar">
+              <span class="compass-step-badge">Tap 3 · Pick Textbook Chapter</span>
+              <div class="compass-ch-picker-row">
+                <div class="select-cell compass-select-cell">
+                  <label class="visually-hidden" for="compass-chapter-select">Pick chapter by NCERT number, English name, or Hindi name</label>
+                  <select id="compass-chapter-select" class="bar-select compass-ch-select">
+                    <option value="0">📖 Choose Chapter (Ch 01, Ch 02… English + हिंदी)</option>
+                  </select>
+                </div>
+                <div id="compass-chapters" class="compass-ch-strip" role="group" aria-label="Quick textbook chapter picks"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Phonetic Hinglish / Voice Match Helper Banner -->
+      <div id="phonetic-banner" class="phonetic-banner" hidden></div>
+
+      <!-- 3. Active Filter & My Revision List Summary Bar -->
       <div class="active-filters-bar" id="active-filters-bar" hidden>
         <span class="active-summary" id="active-summary"></span>
         <div class="active-filters" id="active-filters"></div>
       </div>
 
-      <!-- Chapterwise or Leaderboard Video Cards -->
+      <!-- 4. Structured "1 → 2 → 3 Chapter Roadmap" & Prerequisite Bridge (When Chapter Selected) -->
+      <section id="chapter-roadmap" class="chapter-roadmap" aria-label="Guided 1-2-3 Chapter Study Roadmap" hidden></section>
+
+      <!-- 5. Chapterwise or Goal-Sorted Video Cards -->
       <div id="list" class="content-stream"></div>
     </main>
   </div>
@@ -210,9 +263,9 @@
   <footer id="colophon" class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand-col">
-        <h2 class="footer-heading">Studio v3.0 · Classroom &amp; Student Edition</h2>
+        <h2 class="footer-heading">Studio v4.0 · Student Clarity &amp; Classroom Edition</h2>
         <p id="footer-copy">
-          Every lecture and full-chapter playlist across all major Indian languages is ranked strictly by organic YouTube view velocity and student watch traction — zero paid placement or coaching bias. Filter any chapter, language, or educator and share the exact view with your class in one tap.
+          Built for every student and teacher across India: use the 3-Tap Visual Compass, speak in Hindi/English via 🎤 Voice Search, follow the 1 → 2 → 3 Chapter Roadmap with Prerequisite Bridges, track completed chapters offline, and share any view on WhatsApp in one tap.
         </p>
       </div>
       <div class="footer-links-col">
@@ -249,10 +302,10 @@
     </button>
   </nav>
 
-  <!-- 1. Mobile Full-Height Bottom-Sheet Chapter Picker -->
+  <!-- 1. Mobile Full-Height Bottom-Sheet Chapter Picker (Bilingual + Progress) -->
   <dialog id="syllabus-dialog" class="studio-dialog bottom-sheet-dialog" closedby="any" aria-labelledby="drawer-title">
     <div class="dialog-top">
-      <h2 id="drawer-title" class="dialog-heading">📚 Select Chapter</h2>
+      <h2 id="drawer-title" class="dialog-heading">📚 Pick Textbook Chapter</h2>
       <div class="dialog-top-actions">
         <button type="button" id="drawer-all-ch-btn" class="rail-reset-btn" hidden>All Chapters</button>
         <form method="dialog">
@@ -260,9 +313,12 @@
         </form>
       </div>
     </div>
+    <div class="drawer-progress-strip">
+      <span id="drawer-stat-progress">✅ 0 / 44 Chapters Completed</span>
+    </div>
     <div class="drawer-search-wrap">
-      <label class="visually-hidden" for="drawer-ch-filter">Search chapter name or number</label>
-      <input id="drawer-ch-filter" name="drawer_ch_filter" type="search" class="rail-input" placeholder="Search chapter number or topic…" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <label class="visually-hidden" for="drawer-ch-filter">Search chapter number, English name, or Hindi/Hinglish topic</label>
+      <input id="drawer-ch-filter" name="drawer_ch_filter" type="search" class="rail-input" placeholder="Search Ch 01, Samakalan, Bijli, Mendel…" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
     <div id="drawer-syllabus-tree" class="syllabus-tree drawer-tree"></div>
   </dialog>
@@ -285,7 +341,7 @@
   <!-- 3. Share Current Filtered View Sheet -->
   <dialog id="share-dialog" class="studio-dialog share-sheet-dialog" closedby="any" aria-labelledby="share-sheet-title">
     <div class="dialog-top">
-      <h2 id="share-sheet-title" class="dialog-heading">📤 Share Filtered Classroom View</h2>
+      <h2 id="share-sheet-title" class="dialog-heading">📲 Send Study Link on WhatsApp</h2>
       <form method="dialog">
         <button type="submit" class="icon-btn" aria-label="Close share dialog">✕</button>
       </form>
@@ -293,10 +349,10 @@
     <p id="share-sheet-preview" class="share-preview-box"></p>
     <div class="share-sheet-actions">
       <a id="share-sheet-wa" class="primary-btn is-whatsapp-cta" href="https://wa.me/" target="_blank" rel="noopener noreferrer">
-        📲 Share on WhatsApp
+        📲 Send on WhatsApp
       </a>
       <button type="button" id="share-sheet-copy" class="secondary-btn">
-        🔗 Copy Direct Link
+        🔗 Copy Direct Deep-Link
       </button>
     </div>
   </dialog>
@@ -309,8 +365,11 @@
         <span id="player-channel" class="player-channel"></span>
       </div>
       <div class="player-top-actions">
+        <button type="button" id="player-done-btn" class="yt-external-cta is-done-toggle" aria-pressed="false">
+          ✅ Completed
+        </button>
         <button type="button" id="player-share-btn" class="yt-external-cta is-share">
-          <span aria-hidden="true">📲</span> Share
+          <span aria-hidden="true">📲</span> WhatsApp
         </button>
         <a id="player-ext" class="yt-external-cta" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
           <span aria-hidden="true">↗</span> YouTube App
@@ -325,7 +384,7 @@
     <div id="player-samples" class="player-samples" hidden></div>
   </dialog>
 
-  <!-- Non-blocking Classroom Share Toast -->
+  <!-- Non-blocking Classroom Share & Voice Toast -->
   <div id="share-toast" class="share-toast" role="status" aria-live="polite" hidden>
     <span id="toast-msg" class="toast-msg">✓ Link copied!</span>
     <a id="toast-wa-link" class="toast-wa-btn" href="https://wa.me/" target="_blank" rel="noopener noreferrer">📲 WhatsApp</a>
@@ -335,7 +394,8 @@
   <noscript>
     <p class="noscript-banner">Enable JavaScript to browse and filter verified chapterwise video lectures.</p>
   </noscript>
-  <script src="site-config.js?v=3.0"></script>
-  <script src="app.js?v=3.0"></script>
+  <script src="site-config.js?v=4.0"></script>
+  <script src="pedagogy-data.js?v=4.0"></script>
+  <script src="app.js?v=4.0"></script>
 </body>
 </html>
